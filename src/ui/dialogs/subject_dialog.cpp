@@ -45,6 +45,8 @@ SubjectDialog::SubjectDialog(QWidget *parent, bool editMode, const Subject &subj
 
     auto *formLayout = new QFormLayout;
     formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    formLayout->setHorizontalSpacing(12);
+    formLayout->setVerticalSpacing(12);
     formLayout->addRow(tr("Subject Name"), m_nameEdit);
     formLayout->addRow(tr("Subject Code"), m_codeEdit);
     formLayout->addRow(tr("Teacher"), m_teacherEdit);
@@ -89,5 +91,5 @@ void SubjectDialog::saveSubject()
         m_codeEdit->setFocus();
         return;
     }
-    accept();
+    emit saveRequested(getSubject());
 }

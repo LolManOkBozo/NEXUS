@@ -88,8 +88,8 @@ void MainWindow::createContent()
     // Create pages
     DashboardPage *dashboardPage = new DashboardPage();
     SubjectsPage *subjectsPage = new SubjectsPage(m_application);
-    TimetablePage *timetablePage = new TimetablePage();
-    AssignmentsPage *assignmentsPage = new AssignmentsPage();
+    TimetablePage *timetablePage = new TimetablePage(m_application);
+    AssignmentsPage *assignmentsPage = new AssignmentsPage(m_application);
     AttendancePage *attendancePage = new AttendancePage();
     ExamsPage *examsPage = new ExamsPage();
     NotesPage *notesPage = new NotesPage();

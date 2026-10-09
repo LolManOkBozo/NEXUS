@@ -77,7 +77,7 @@ void DatabaseTests::testForeignKeysEnabled()
 {
     QSqlDatabase db = m_dbManager->database();
     QSqlQuery query(db);
-    query.exec(QStringLiteral("PRAGMA foreign_keys;"));
+    QVERIFY(query.exec(QStringLiteral("PRAGMA foreign_keys;")));
     QVERIFY(query.next());
     QCOMPARE(query.value(0).toInt(), 1);
 }

@@ -12,6 +12,7 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QSpinBox>
+#include <QSqlQuery>
 
 #include "../src/core/application.h"
 #include "../src/ui/dialogs/subject_dialog.h"
@@ -27,15 +28,24 @@ private:
     MainWindow *m_window{nullptr};
     bool m_dialogOpened{false};
     bool m_confirmationOpened{false};
+    bool m_saveFailureDialogRetained{false};
+    bool m_saveFailureLeftDataUnchanged{false};
+    QString m_confirmationText;
+    QString m_saveFailureWarning;
 
 private slots:
     void initTestCase();
     void cleanupTestCase();
     void navigateAndManageSubjects();
+    void failedSubjectAddPreservesInput();
+    void failedSubjectEditPreservesInput();
 
 private:
     void scheduleSubjectDialog(const QString &name, const QString &code,
                                const QString &teacher, int credits, int semester);
+    void scheduleSubjectSaveFailure(const QString &name, const QString &code,
+                                    const QString &teacher, int credits, int semester,
+                                    int subjectId);
     void scheduleDeleteConfirmation(QMessageBox::StandardButton answer);
 };
 
@@ -82,7 +92,102 @@ void SubjectsUiTests::scheduleDeleteConfirmation(QMessageBox::StandardButton ans
             return;
         }
         m_confirmationOpened = true;
+        m_confirmationText = messageBox->text();
         messageBox->button(answer)->click();
+    });
+}
+
+void SubjectsUiTests::scheduleSubjectSaveFailure(const QString &name,
+                                                 const QString &code,
+                                                 const QString &teacher,
+                                                 int credits, int semester,
+                                                 int subjectId)
+{
+    QTimer::singleShot(0, this, [this, name, code, teacher, credits, semester,
+                                 subjectId] {
+        auto *dialog = qobject_cast<SubjectDialog *>(QApplication::activeModalWidget());
+        if (!dialog) {
+            return;
+        }
+        m_dialogOpened = true;
+        auto *nameEdit = dialog->findChild<QLineEdit *>(QStringLiteral("subjectNameEdit"));
+        auto *codeEdit = dialog->findChild<QLineEdit *>(QStringLiteral("subjectCodeEdit"));
+        auto *teacherEdit = dialog->findChild<QLineEdit *>(QStringLiteral("subjectTeacherEdit"));
+        auto *creditsSpinBox =
+            dialog->findChild<QSpinBox *>(QStringLiteral("subjectCreditsSpinBox"));
+        auto *semesterSpinBox =
+            dialog->findChild<QSpinBox *>(QStringLiteral("subjectSemesterSpinBox"));
+        auto *save = dialog->findChild<QPushButton *>(QStringLiteral("saveSubjectButton"));
+        if (!nameEdit || !codeEdit || !teacherEdit || !creditsSpinBox
+            || !semesterSpinBox || !save) {
+            return;
+        }
+        nameEdit->setText(name);
+        codeEdit->setText(code);
+        teacherEdit->setText(teacher);
+        creditsSpinBox->setValue(credits);
+        semesterSpinBox->setValue(semester);
+
+        m_application->databaseManager()->close();
+        QTimer::singleShot(0, this, [this] {
+            auto *messageBox =
+                qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+            if (!messageBox) {
+                return;
+            }
+            m_saveFailureWarning = messageBox->text();
+            messageBox->accept();
+        });
+        save->click();
+
+        auto *activeDialog =
+            qobject_cast<SubjectDialog *>(QApplication::activeModalWidget());
+        auto *retainedName = activeDialog
+            ? activeDialog->findChild<QLineEdit *>(QStringLiteral("subjectNameEdit"))
+            : nullptr;
+        auto *retainedCode = activeDialog
+            ? activeDialog->findChild<QLineEdit *>(QStringLiteral("subjectCodeEdit"))
+            : nullptr;
+        auto *retainedTeacher = activeDialog
+            ? activeDialog->findChild<QLineEdit *>(QStringLiteral("subjectTeacherEdit"))
+            : nullptr;
+        auto *retainedCredits = activeDialog
+            ? activeDialog->findChild<QSpinBox *>(QStringLiteral("subjectCreditsSpinBox"))
+            : nullptr;
+        auto *retainedSemester = activeDialog
+            ? activeDialog->findChild<QSpinBox *>(QStringLiteral("subjectSemesterSpinBox"))
+            : nullptr;
+        m_saveFailureDialogRetained =
+            activeDialog == dialog && retainedName && retainedCode && retainedTeacher
+            && retainedCredits && retainedSemester
+            && retainedName->text() == name && retainedCode->text() == code
+            && retainedTeacher->text() == teacher && retainedCredits->value() == credits
+            && retainedSemester->value() == semester;
+
+        if (!m_application->initialize()) {
+            dialog->reject();
+            return;
+        }
+        QSqlQuery query(m_application->databaseManager()->database());
+        if (subjectId > 0) {
+            query.prepare(QStringLiteral("SELECT name, code FROM subjects WHERE id = :id"));
+            query.bindValue(QStringLiteral(":id"), subjectId);
+            m_saveFailureLeftDataUnchanged =
+                query.exec() && query.next()
+                && query.value(0).toString() != name
+                && query.value(1).toString() != code;
+        } else {
+            query.prepare(QStringLiteral(
+                "SELECT COUNT(*) FROM subjects WHERE user_id = :user_id AND code = :code"));
+            query.bindValue(QStringLiteral(":user_id"),
+                            m_application->currentUserId());
+            query.bindValue(QStringLiteral(":code"), code);
+            m_saveFailureLeftDataUnchanged =
+                query.exec() && query.next() && query.value(0).toInt() == 0;
+        }
+        if (activeDialog == dialog) {
+            save->click();
+        }
     });
 }
 
@@ -91,6 +196,12 @@ void SubjectsUiTests::navigateAndManageSubjects()
     m_window->show();
     QApplication::processEvents();
     QVERIFY(!m_window->isHidden());
+    const QString sharedStyle = qApp->styleSheet();
+    QVERIFY(sharedStyle.contains(QStringLiteral("QComboBox")));
+    QVERIFY(sharedStyle.contains(QStringLiteral("QAbstractSpinBox")));
+    QVERIFY(sharedStyle.contains(QStringLiteral("QTableWidget::item")));
+    QVERIFY(sharedStyle.contains(QStringLiteral("padding: 8px 9px")));
+    QVERIFY(sharedStyle.contains(QStringLiteral("padding: 7px 8px")));
 
     auto *sidebar = m_window->findChild<QListWidget *>(QStringLiteral("sidebar"));
     auto *stack = m_window->findChild<QStackedWidget *>();
@@ -102,6 +213,8 @@ void SubjectsUiTests::navigateAndManageSubjects()
         sidebar->setCurrentRow(row);
         QCOMPARE(stack->currentIndex(), row);
     }
+    sidebar->setCurrentRow(2);
+    QCOMPARE(stack->currentWidget()->objectName(), QStringLiteral("timetablePage"));
 
     sidebar->setCurrentRow(1);
     auto *table = m_window->findChild<QTableWidget *>(QStringLiteral("subjectsTable"));
@@ -157,6 +270,7 @@ void SubjectsUiTests::navigateAndManageSubjects()
     scheduleDeleteConfirmation(QMessageBox::No);
     deleteButton->click();
     QVERIFY(m_confirmationOpened);
+    QVERIFY(m_confirmationText.contains(QStringLiteral("timetable entries")));
     QCOMPARE(table->rowCount(), 1);
 
     m_confirmationOpened = false;
@@ -185,6 +299,68 @@ void SubjectsUiTests::navigateAndManageSubjects()
     QCOMPARE(table->rowCount(), 1);
     QCOMPARE(table->item(0, 0)->text(), QStringLiteral("Computer Networks"));
     QCOMPARE(table->item(0, 1)->text(), QStringLiteral("CSIT-301"));
+}
+
+void SubjectsUiTests::failedSubjectAddPreservesInput()
+{
+    auto *sidebar = m_window->findChild<QListWidget *>(QStringLiteral("sidebar"));
+    sidebar->setCurrentRow(1);
+    auto *addButton = m_window->findChild<QPushButton *>(QStringLiteral("addSubjectButton"));
+    QVERIFY(addButton);
+
+    m_dialogOpened = false;
+    m_saveFailureDialogRetained = false;
+    m_saveFailureLeftDataUnchanged = false;
+    m_saveFailureWarning.clear();
+    scheduleSubjectSaveFailure(QStringLiteral("Retained Add Subject"),
+                               QStringLiteral("TEST-ADD-FAIL"),
+                               QStringLiteral("Test Teacher"), 4, 5, 0);
+    addButton->click();
+
+    QVERIFY(m_dialogOpened);
+    QVERIFY(m_saveFailureDialogRetained);
+    QVERIFY(m_saveFailureLeftDataUnchanged);
+    QVERIFY(m_saveFailureWarning.contains(QStringLiteral("database is not available")));
+    auto *table = m_window->findChild<QTableWidget *>(QStringLiteral("subjectsTable"));
+    QVERIFY(table);
+    QCOMPARE(table->rowCount(), 2);
+    QVERIFY(table->findItems(QStringLiteral("Retained Add Subject"), Qt::MatchExactly).size()
+            == 1);
+}
+
+void SubjectsUiTests::failedSubjectEditPreservesInput()
+{
+    auto *table = m_window->findChild<QTableWidget *>(QStringLiteral("subjectsTable"));
+    QVERIFY(table);
+    int row = -1;
+    for (int candidate = 0; candidate < table->rowCount(); ++candidate) {
+        if (table->item(candidate, 0)->text() == QStringLiteral("Retained Add Subject")) {
+            row = candidate;
+            break;
+        }
+    }
+    QVERIFY(row >= 0);
+    const int subjectId = table->item(row, 0)->data(Qt::UserRole).toInt();
+    auto *actions = table->cellWidget(row, 5);
+    QVERIFY(actions);
+    auto *editButton = actions->findChild<QPushButton *>(QStringLiteral("editSubjectButton"));
+    QVERIFY(editButton);
+
+    m_dialogOpened = false;
+    m_saveFailureDialogRetained = false;
+    m_saveFailureLeftDataUnchanged = false;
+    m_saveFailureWarning.clear();
+    scheduleSubjectSaveFailure(QStringLiteral("Retained Edit Subject"),
+                               QStringLiteral("TEST-EDIT-FAIL"),
+                               QStringLiteral("Updated Teacher"), 5, 6, subjectId);
+    editButton->click();
+
+    QVERIFY(m_dialogOpened);
+    QVERIFY(m_saveFailureDialogRetained);
+    QVERIFY(m_saveFailureLeftDataUnchanged);
+    QVERIFY(m_saveFailureWarning.contains(QStringLiteral("database is not available")));
+    QCOMPARE(table->item(row, 0)->text(), QStringLiteral("Retained Edit Subject"));
+    QCOMPARE(table->item(row, 1)->text(), QStringLiteral("TEST-EDIT-FAIL"));
 }
 
 QTEST_MAIN(SubjectsUiTests)

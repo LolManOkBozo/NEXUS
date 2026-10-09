@@ -72,6 +72,7 @@ void SubjectsPage::setupUi()
 
     m_emptyState->setObjectName(QStringLiteral("subjectsEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);
+    emptyLayout->setContentsMargins(24, 24, 24, 24);
     emptyLayout->setAlignment(Qt::AlignCenter);
     emptyLayout->setSpacing(12);
     m_emptyMessage->setObjectName(QStringLiteral("subjectsEmptyMessage"));
@@ -166,15 +167,17 @@ void SubjectsPage::addSubject()
     }
 
     SubjectDialog dialog(this);
+    connect(&dialog, &SubjectDialog::saveRequested, this,
+            [this, &dialog](Subject subject) {
+                subject.setUserId(m_application->currentUserId());
+                QString errorMessage;
+                if (!m_subjectService->addSubject(subject, &errorMessage)) {
+                    QMessageBox::warning(&dialog, tr("Could Not Add Subject"), errorMessage);
+                    return;
+                }
+                dialog.accept();
+            });
     if (dialog.exec() != QDialog::Accepted) {
-        return;
-    }
-
-    Subject subject = dialog.getSubject();
-    subject.setUserId(m_application->currentUserId());
-    QString errorMessage;
-    if (!m_subjectService->addSubject(subject, &errorMessage)) {
-        QMessageBox::warning(this, tr("Could Not Add Subject"), errorMessage);
         return;
     }
 
@@ -198,14 +201,19 @@ void SubjectsPage::editSubject(int subjectId)
     }
 
     SubjectDialog dialog(this, true, subject);
+    connect(&dialog, &SubjectDialog::saveRequested, this,
+            [this, &dialog](const Subject &updatedSubject) {
+                QString saveError;
+                if (!m_subjectService->updateSubject(updatedSubject, &saveError)) {
+                    QMessageBox::warning(&dialog, tr("Could Not Update Subject"), saveError);
+                    return;
+                }
+                dialog.accept();
+            });
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
-    if (!m_subjectService->updateSubject(dialog.getSubject(), &errorMessage)) {
-        QMessageBox::warning(this, tr("Could Not Update Subject"), errorMessage);
-        return;
-    }
     refreshSubjects();
 }
 
@@ -216,7 +224,8 @@ void SubjectsPage::deleteSubject(int subjectId)
     }
 
     const auto answer = QMessageBox::question(
-        this, tr("Delete Subject"), tr("Are you sure you want to delete this subject?"),
+        this, tr("Delete Subject"),
+        tr("Are you sure you want to delete this subject? Its associated timetable entries will also be deleted."),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if (answer != QMessageBox::Yes) {
         return;

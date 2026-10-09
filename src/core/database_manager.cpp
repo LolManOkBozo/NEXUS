@@ -126,9 +126,17 @@ bool DatabaseManager::enableForeignKeys()
         return false;
     }
 
-    // Verify that foreign keys are enabled
-    query.exec(QStringLiteral("PRAGMA foreign_keys;"));
-    if (query.next() && query.value(0).toInt() != 1) {
+    if (!query.exec(QStringLiteral("PRAGMA foreign_keys;"))) {
+        m_lastError = QStringLiteral("Failed to verify SQLite foreign keys: ")
+                      + query.lastError().text();
+        return false;
+    }
+    if (!query.next()) {
+        m_lastError = QStringLiteral(
+            "Failed to verify SQLite foreign keys: the query returned no result.");
+        return false;
+    }
+    if (query.value(0).toInt() != 1) {
         m_lastError = QStringLiteral("Foreign keys are not enabled.");
         return false;
     }

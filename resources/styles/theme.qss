@@ -15,7 +15,7 @@ QListWidget#sidebar {
     outline: none;
 }
 QListWidget#sidebar::item {
-    padding: 10px;
+    padding: 11px 12px;
     border-radius: 4px;
     margin: 2px;
 }
@@ -25,15 +25,21 @@ QListWidget#sidebar::item:selected {
 }
 QLabel {
     color: #ffffff;
+    background-color: transparent;
+    border: none;
+    padding: 0;
 }
-QFrame {
+QFrame#cardsFrame,
+QFrame#card,
+QFrame#scheduleFrame {
     background-color: #3c3f41;
     border-radius: 8px;
 }
 QPushButton {
     background-color: #3c3f41;
     border: none;
-    padding: 8px 16px;
+    padding: 9px 14px;
+    min-height: 20px;
     border-radius: 4px;
     color: #ffffff;
 }
@@ -43,15 +49,71 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #35383a;
 }
+QPushButton#editAssignmentButton,
+QPushButton#deleteAssignmentButton {
+    background-color: #45494c;
+    border: 1px solid #62676b;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+QPushButton#editAssignmentButton:hover,
+QPushButton#deleteAssignmentButton:hover {
+    background-color: #505559;
+}
+QPushButton#editAssignmentButton:pressed,
+QPushButton#deleteAssignmentButton:pressed {
+    background-color: #383c3f;
+}
+QLabel#assignmentFieldLabel {
+    background-color: #3c3f41;
+    padding: 5px 8px;
+    border-radius: 4px;
+}
+QWidget#assignmentActionWidget {
+    background-color: transparent;
+}
 QLineEdit {
     background-color: #3c3f41;
     border: 1px solid #555555;
     border-radius: 4px;
-    padding: 6px;
+    padding: 8px 9px;
+    min-height: 20px;
     color: #ffffff;
 }
 QLineEdit:focus {
     border: 1px solid #7a7a7a;
+}
+QComboBox,
+QAbstractSpinBox {
+    background-color: #3c3f41;
+    border: 1px solid #555555;
+    border-radius: 4px;
+    padding: 7px 9px;
+    min-height: 20px;
+    color: #ffffff;
+}
+QComboBox:focus,
+QAbstractSpinBox:focus {
+    border: 1px solid #7a7a7a;
+}
+QComboBox::drop-down {
+    border: none;
+    padding: 0 6px;
+}
+QComboBox QAbstractItemView {
+    background-color: #3c3f41;
+    border: 1px solid #555555;
+    selection-background-color: #4a4d50;
+    padding: 4px;
+}
+QComboBox QAbstractItemView::item {
+    padding: 6px 8px;
+}
+QTableWidget::item {
+    padding: 6px 8px;
+}
+QHeaderView::section {
+    padding: 7px 8px;
 }
 QScrollArea {
     background-color: transparent;

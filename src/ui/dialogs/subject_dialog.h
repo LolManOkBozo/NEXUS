@@ -17,6 +17,9 @@ public:
 
     Subject getSubject() const;
 
+signals:
+    void saveRequested(const Subject &subject);
+
 private slots:
     void saveSubject();
 

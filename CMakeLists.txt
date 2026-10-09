@@ -42,12 +42,28 @@ add_executable(NEXUS
     src/core/database_manager.cpp
     src/data/subject_dao.h
     src/data/subject_dao.cpp
+    src/data/assignment_dao.h
+    src/data/assignment_dao.cpp
+    src/data/timetable_dao.h
+    src/data/timetable_dao.cpp
     src/models/subject.h
     src/models/subject.cpp
+    src/models/assignment.h
+    src/models/assignment.cpp
+    src/models/timetable.h
+    src/models/timetable.cpp
     src/services/subject_service.h
     src/services/subject_service.cpp
+    src/services/assignment_service.h
+    src/services/assignment_service.cpp
+    src/services/timetable_service.h
+    src/services/timetable_service.cpp
     src/ui/dialogs/subject_dialog.h
     src/ui/dialogs/subject_dialog.cpp
+    src/ui/dialogs/timetable_entry_dialog.h
+    src/ui/dialogs/timetable_entry_dialog.cpp
+    src/ui/dialogs/assignment_dialog.h
+    src/ui/dialogs/assignment_dialog.cpp
     resources/resources.qrc
 )
 
@@ -133,14 +149,30 @@ if(TARGET Qt6::Test)
         src/core/database_manager.h
         src/data/subject_dao.cpp
         src/data/subject_dao.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/data/timetable_dao.cpp
+        src/data/timetable_dao.h
+        src/models/assignment.cpp
+        src/models/assignment.h
         src/models/subject.cpp
         src/models/subject.h
+        src/models/timetable.cpp
+        src/models/timetable.h
         src/services/subject_service.cpp
         src/services/subject_service.h
+        src/services/assignment_service.cpp
+        src/services/assignment_service.h
+        src/services/timetable_service.cpp
+        src/services/timetable_service.h
         src/ui/main_window.cpp
         src/ui/main_window.h
         src/ui/dialogs/subject_dialog.cpp
         src/ui/dialogs/subject_dialog.h
+        src/ui/dialogs/timetable_entry_dialog.cpp
+        src/ui/dialogs/timetable_entry_dialog.h
+        src/ui/dialogs/assignment_dialog.cpp
+        src/ui/dialogs/assignment_dialog.h
         src/ui/pages/dashboard_page.cpp
         src/ui/pages/dashboard_page.h
         src/ui/pages/subjects_page.cpp
@@ -178,6 +210,174 @@ if(TARGET Qt6::Test)
     get_filename_component(QT_PLATFORM_PLUGIN_DIR
         "${Qt6_DIR}/../../../plugins/platforms" ABSOLUTE)
     set_tests_properties(SubjectUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_timetable_ui_tests
+        tests/timetable_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/data/timetable_dao.cpp
+        src/data/timetable_dao.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/models/timetable.cpp
+        src/models/timetable.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/services/timetable_service.cpp
+        src/services/timetable_service.h
+        src/ui/dialogs/timetable_entry_dialog.cpp
+        src/ui/dialogs/timetable_entry_dialog.h
+        src/ui/pages/timetable_page.cpp
+        src/ui/pages/timetable_page.h
+    )
+    target_link_libraries(nexus_timetable_ui_tests
+        PRIVATE
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_timetable_ui_tests)
+    endif()
+    add_test(NAME TimetableUiTests COMMAND nexus_timetable_ui_tests)
+    set_tests_properties(TimetableUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_timetable_tests
+        tests/timetable_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/timetable_dao.cpp
+        src/data/timetable_dao.h
+        src/models/timetable.cpp
+        src/models/timetable.h
+    )
+    target_link_libraries(nexus_timetable_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_timetable_tests)
+    endif()
+    add_test(NAME TimetableTests COMMAND nexus_timetable_tests)
+
+    add_executable(nexus_timetable_service_tests
+        tests/timetable_service_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/timetable_dao.cpp
+        src/data/timetable_dao.h
+        src/models/timetable.cpp
+        src/models/timetable.h
+        src/services/timetable_service.cpp
+        src/services/timetable_service.h
+    )
+    target_link_libraries(nexus_timetable_service_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_timetable_service_tests)
+    endif()
+    add_test(NAME TimetableServiceTests COMMAND nexus_timetable_service_tests)
+
+    add_executable(nexus_assignment_tests
+        tests/assignment_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/models/assignment.cpp
+        src/models/assignment.h
+    )
+    target_link_libraries(nexus_assignment_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_assignment_tests)
+    endif()
+    add_test(NAME AssignmentTests COMMAND nexus_assignment_tests)
+
+    add_executable(nexus_assignment_service_tests
+        tests/assignment_service_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/assignment.cpp
+        src/models/assignment.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/assignment_service.cpp
+        src/services/assignment_service.h
+    )
+    target_link_libraries(nexus_assignment_service_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_assignment_service_tests)
+    endif()
+    add_test(NAME AssignmentServiceTests COMMAND nexus_assignment_service_tests)
+
+    add_executable(nexus_assignment_ui_tests
+        tests/assignment_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/assignment.cpp
+        src/models/assignment.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/assignment_service.cpp
+        src/services/assignment_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/ui/dialogs/assignment_dialog.cpp
+        src/ui/dialogs/assignment_dialog.h
+        src/ui/pages/assignments_page.cpp
+        src/ui/pages/assignments_page.h
+    )
+    target_link_libraries(nexus_assignment_ui_tests
+        PRIVATE
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Sql
+            Qt6::Test
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_assignment_ui_tests)
+    endif()
+    add_test(NAME AssignmentUiTests COMMAND nexus_assignment_ui_tests)
+    set_tests_properties(AssignmentUiTests PROPERTIES
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )
