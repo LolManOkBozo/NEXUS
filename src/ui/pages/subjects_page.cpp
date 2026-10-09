@@ -38,6 +38,7 @@ SubjectsPage::~SubjectsPage() = default;
 void SubjectsPage::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
+    refreshSubjects();
     QTimer::singleShot(50, this, [this] { window()->repaint(); });
 }
 
@@ -242,7 +243,7 @@ void SubjectsPage::deleteSubject(int subjectId)
 
     const auto answer = QMessageBox::question(
         this, tr("Delete Subject"),
-        tr("Are you sure you want to delete this subject? Its associated timetable entries will also be deleted."),
+        tr("Are you sure you want to delete this subject? Its associated timetable entries and assignments will also be deleted."),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
     if (answer != QMessageBox::Yes) {
         return;

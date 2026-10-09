@@ -10,8 +10,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSignalBlocker>
+#include <QShowEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include "../../core/application.h"
@@ -119,6 +121,13 @@ AssignmentsPage::AssignmentsPage(Application *application, QWidget *parent)
 }
 
 AssignmentsPage::~AssignmentsPage() = default;
+
+void AssignmentsPage::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+    refreshAssignments();
+    QTimer::singleShot(50, this, [this] { window()->repaint(); });
+}
 
 void AssignmentsPage::refreshAssignments()
 {
@@ -295,6 +304,10 @@ void AssignmentsPage::editAssignment(int assignmentId)
     const Assignment assignment =
         m_assignmentService->getAssignment(userId, assignmentId, &errorMessage);
     if (!errorMessage.isEmpty() || assignment.id() <= 0) {
+        if (errorMessage == QStringLiteral("Assignment not found.")) {
+            refreshAssignments();
+            return;
+        }
         QMessageBox::warning(this, tr("Could Not Load Assignment"),
                              errorMessage.isEmpty() ? tr("The assignment no longer exists.")
                                                     : errorMessage);
@@ -339,9 +352,13 @@ void AssignmentsPage::deleteAssignment(int assignmentId)
         return;
     }
 
+    const int userId = m_application->currentUserId();
     QString errorMessage;
-    if (!m_assignmentService->deleteAssignment(
-            m_application->currentUserId(), assignmentId, &errorMessage)) {
+    if (!m_assignmentService->deleteAssignment(userId, assignmentId, &errorMessage)) {
+        if (errorMessage == QStringLiteral("Assignment not found.")) {
+            refreshAssignments();
+            return;
+        }
         QMessageBox::warning(this, tr("Could Not Delete Assignment"), errorMessage);
         return;
     }

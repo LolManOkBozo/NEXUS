@@ -28,11 +28,11 @@ protected:
 private slots:
     void refreshTimetable();
     void addTimetable();
+    void deleteTimetable(int timetableId);
 
 private:
     void setupUi();
     void editTimetable(int timetableId);
-    void deleteTimetable(int timetableId);
 
     Application *m_application;
     std::unique_ptr<TimetableDAO> m_timetableDAO;

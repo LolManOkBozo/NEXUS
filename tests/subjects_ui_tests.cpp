@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QAbstractButton>
+#include <QDateTime>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -15,6 +16,8 @@
 #include <QTimer>
 #include <QSpinBox>
 #include <QSqlQuery>
+
+#include <utility>
 
 #include "../src/core/application.h"
 #include "../src/ui/dialogs/subject_dialog.h"
@@ -30,6 +33,7 @@ private:
     MainWindow *m_window{nullptr};
     bool m_dialogOpened{false};
     bool m_confirmationOpened{false};
+    bool m_unexpectedStaleWarning{false};
     bool m_saveFailureDialogRetained{false};
     bool m_saveFailureLeftDataUnchanged{false};
     QString m_confirmationText;
@@ -41,6 +45,7 @@ private slots:
     void navigateAndManageSubjects();
     void failedSubjectAddPreservesInput();
     void failedSubjectEditPreservesInput();
+    void deletingSubjectCascadesAndRefreshesChildPages();
 
 private:
     void scheduleSubjectDialog(const QString &name, const QString &code,
@@ -382,6 +387,226 @@ void SubjectsUiTests::failedSubjectEditPreservesInput()
     QVERIFY(m_saveFailureWarning.contains(QStringLiteral("database is not available")));
     QCOMPARE(table->item(row, 0)->text(), QStringLiteral("Retained Edit Subject"));
     QCOMPARE(table->item(row, 1)->text(), QStringLiteral("TEST-EDIT-FAIL"));
+}
+
+void SubjectsUiTests::deletingSubjectCascadesAndRefreshesChildPages()
+{
+    m_window->show();
+    QApplication::processEvents();
+    QSqlQuery query(m_application->databaseManager()->database());
+    QVERIFY(query.exec(QStringLiteral("DELETE FROM assignments")));
+    QVERIFY(query.exec(QStringLiteral("DELETE FROM timetable")));
+    QVERIFY(query.exec(QStringLiteral("DELETE FROM subjects")));
+
+    const int currentUserId = m_application->currentUserId();
+    QSqlQuery userQuery(m_application->databaseManager()->database());
+    QVERIFY(userQuery.prepare(QStringLiteral(
+        "INSERT INTO users (name, email, created_at) "
+        "VALUES (:name, :email, :created_at)")));
+    userQuery.bindValue(QStringLiteral(":name"), QStringLiteral("Cascade Test User"));
+    userQuery.bindValue(QStringLiteral(":email"), QStringLiteral("cascade-test@example.test"));
+    userQuery.bindValue(QStringLiteral(":created_at"),
+                        QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+    QVERIFY(userQuery.exec());
+    const int otherUserId = userQuery.lastInsertId().toInt();
+    QVERIFY(otherUserId > 0);
+
+    auto insertSubject = [this](int userId, const QString &name) {
+        QSqlQuery subjectQuery(m_application->databaseManager()->database());
+        if (!subjectQuery.prepare(QStringLiteral(
+                "INSERT INTO subjects (user_id, name, created_at) "
+                "VALUES (:user_id, :name, :created_at)"))) {
+            return 0;
+        }
+        subjectQuery.bindValue(QStringLiteral(":user_id"), userId);
+        subjectQuery.bindValue(QStringLiteral(":name"), name);
+        subjectQuery.bindValue(QStringLiteral(":created_at"),
+                               QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+        if (!subjectQuery.exec()) {
+            return 0;
+        }
+        return subjectQuery.lastInsertId().toInt();
+    };
+    const int deletedSubjectId = insertSubject(currentUserId, QStringLiteral("Cascade Subject"));
+    const int unrelatedSubjectId = insertSubject(currentUserId, QStringLiteral("Unrelated Subject"));
+    const int otherUsersSubjectId = insertSubject(otherUserId, QStringLiteral("Other User Subject"));
+    QVERIFY(deletedSubjectId > 0);
+    QVERIFY(unrelatedSubjectId > 0);
+    QVERIFY(otherUsersSubjectId > 0);
+
+    auto insertChildren = [this](int userId, int subjectId,
+                                 const QString &title) -> std::pair<int, int> {
+        QSqlQuery timetableQuery(m_application->databaseManager()->database());
+        if (!timetableQuery.prepare(QStringLiteral(
+                "INSERT INTO timetable "
+                "(user_id, subject_id, day_of_week, start_time, end_time, room) "
+                "VALUES (:user_id, :subject_id, 1, '09:00', '10:00', 'Test Room')"))) {
+            return {};
+        }
+        timetableQuery.bindValue(QStringLiteral(":user_id"), userId);
+        timetableQuery.bindValue(QStringLiteral(":subject_id"), subjectId);
+        if (!timetableQuery.exec()) {
+            return {};
+        }
+        const int timetableId = timetableQuery.lastInsertId().toInt();
+
+        QSqlQuery assignmentQuery(m_application->databaseManager()->database());
+        if (!assignmentQuery.prepare(QStringLiteral(
+                "INSERT INTO assignments "
+                "(user_id, subject_id, title, description, deadline, priority, status, created_at) "
+                "VALUES (:user_id, :subject_id, :title, '', '2026-10-20', "
+                "'Medium', 'Not Started', :created_at)"))) {
+            return {};
+        }
+        assignmentQuery.bindValue(QStringLiteral(":user_id"), userId);
+        assignmentQuery.bindValue(QStringLiteral(":subject_id"), subjectId);
+        assignmentQuery.bindValue(QStringLiteral(":title"), title);
+        assignmentQuery.bindValue(QStringLiteral(":created_at"),
+                                  QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+        if (!assignmentQuery.exec()) {
+            return {};
+        }
+        return {timetableId, assignmentQuery.lastInsertId().toInt()};
+    };
+    const auto deletedChildren =
+        insertChildren(currentUserId, deletedSubjectId, QStringLiteral("Deleted Assignment"));
+    const auto unrelatedChildren =
+        insertChildren(currentUserId, unrelatedSubjectId, QStringLiteral("Unrelated Assignment"));
+    const auto privateChildren =
+        insertChildren(otherUserId, otherUsersSubjectId, QStringLiteral("Private Assignment"));
+    QVERIFY(deletedChildren.first > 0 && deletedChildren.second > 0);
+    QVERIFY(unrelatedChildren.first > 0 && unrelatedChildren.second > 0);
+    QVERIFY(privateChildren.first > 0 && privateChildren.second > 0);
+
+    auto *sidebar = m_window->findChild<QListWidget *>(QStringLiteral("sidebar"));
+    auto *subjectsTable =
+        m_window->findChild<QTableWidget *>(QStringLiteral("subjectsTable"));
+    QVERIFY(sidebar);
+    QVERIFY(subjectsTable);
+    sidebar->setCurrentRow(0);
+    QApplication::processEvents();
+    sidebar->setCurrentRow(1);
+    QApplication::processEvents();
+
+    int deletedSubjectRow = -1;
+    for (int row = 0; row < subjectsTable->rowCount(); ++row) {
+        if (subjectsTable->item(row, 0)->data(Qt::UserRole).toInt() == deletedSubjectId) {
+            deletedSubjectRow = row;
+            break;
+        }
+    }
+    QVERIFY(deletedSubjectRow >= 0);
+    auto *subjectActions = subjectsTable->cellWidget(deletedSubjectRow, 5);
+    QVERIFY(subjectActions);
+    auto *deleteSubjectButton =
+        subjectActions->findChild<QPushButton *>(QStringLiteral("deleteSubjectButton"));
+    QVERIFY(deleteSubjectButton);
+    m_confirmationOpened = false;
+    scheduleDeleteConfirmation(QMessageBox::Yes);
+    deleteSubjectButton->click();
+    QVERIFY(m_confirmationOpened);
+    QVERIFY(m_confirmationText.contains(QStringLiteral("assignments")));
+
+    auto countForSubject = [this](const QString &tableName, int subjectId) {
+        QSqlQuery countQuery(m_application->databaseManager()->database());
+        if (!countQuery.prepare(QStringLiteral(
+                "SELECT COUNT(*) FROM %1 WHERE subject_id = :subject_id").arg(tableName))) {
+            return -1;
+        }
+        countQuery.bindValue(QStringLiteral(":subject_id"), subjectId);
+        if (!countQuery.exec() || !countQuery.next()) {
+            return -1;
+        }
+        return countQuery.value(0).toInt();
+    };
+    QCOMPARE(countForSubject(QStringLiteral("timetable"), deletedSubjectId), 0);
+    QCOMPARE(countForSubject(QStringLiteral("assignments"), deletedSubjectId), 0);
+    QCOMPARE(countForSubject(QStringLiteral("timetable"), unrelatedSubjectId), 1);
+    QCOMPARE(countForSubject(QStringLiteral("assignments"), unrelatedSubjectId), 1);
+    QCOMPARE(countForSubject(QStringLiteral("timetable"), otherUsersSubjectId), 1);
+    QCOMPARE(countForSubject(QStringLiteral("assignments"), otherUsersSubjectId), 1);
+
+    auto *timetablePage = m_window->findChild<QObject *>(QStringLiteral("timetablePage"));
+    auto *assignmentsPage = m_window->findChild<QObject *>(QStringLiteral("assignmentsPage"));
+    QVERIFY(timetablePage);
+    QVERIFY(assignmentsPage);
+    sidebar->setCurrentRow(2);
+    QApplication::processEvents();
+    auto *timetableTable =
+        m_window->findChild<QTableWidget *>(QStringLiteral("timetableTable"));
+    QVERIFY(timetableTable);
+    QCOMPARE(timetableTable->rowCount(), 1);
+    QCOMPARE(timetableTable->item(0, 0)->text(), QStringLiteral("Unrelated Subject"));
+
+    auto scheduleStaleConfirmation = [this] {
+        m_unexpectedStaleWarning = false;
+        QTimer::singleShot(0, this, [this] {
+            auto *confirmation =
+                qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+            if (!confirmation) {
+                return;
+            }
+            confirmation->button(QMessageBox::Yes)->click();
+            QTimer::singleShot(0, this, [this] {
+                auto *warning =
+                    qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+                if (warning && warning->standardButtons().testFlag(QMessageBox::Ok)) {
+                    m_unexpectedStaleWarning = true;
+                    warning->accept();
+                }
+            });
+        });
+    };
+    scheduleStaleConfirmation();
+    QVERIFY(QMetaObject::invokeMethod(timetablePage, "deleteTimetable",
+                                      Qt::DirectConnection, Q_ARG(int, deletedChildren.first)));
+    QApplication::processEvents();
+    QVERIFY(!m_unexpectedStaleWarning);
+    QCOMPARE(timetableTable->rowCount(), 1);
+
+    sidebar->setCurrentRow(3);
+    QApplication::processEvents();
+    auto *assignmentsTable =
+        m_window->findChild<QTableWidget *>(QStringLiteral("assignmentsTable"));
+    QVERIFY(assignmentsTable);
+    QCOMPARE(assignmentsTable->rowCount(), 1);
+    QCOMPARE(assignmentsTable->item(0, 0)->text(), QStringLiteral("Unrelated Assignment"));
+    scheduleStaleConfirmation();
+    QVERIFY(QMetaObject::invokeMethod(assignmentsPage, "deleteAssignment",
+                                      Qt::DirectConnection, Q_ARG(int, deletedChildren.second)));
+    QApplication::processEvents();
+    QVERIFY(!m_unexpectedStaleWarning);
+    QCOMPARE(assignmentsTable->rowCount(), 1);
+
+    sidebar->setCurrentRow(2);
+    QApplication::processEvents();
+    auto *unrelatedActions = timetableTable->cellWidget(0, 3);
+    QVERIFY(unrelatedActions);
+    auto *deleteTimetableButton = unrelatedActions->findChild<QPushButton *>(
+        QStringLiteral("deleteTimetableButton"));
+    QVERIFY(deleteTimetableButton);
+    m_confirmationOpened = false;
+    scheduleDeleteConfirmation(QMessageBox::Yes);
+    deleteTimetableButton->click();
+    QVERIFY(m_confirmationOpened);
+    QCOMPARE(timetableTable->rowCount(), 0);
+    QCOMPARE(countForSubject(QStringLiteral("timetable"), unrelatedSubjectId), 0);
+
+    sidebar->setCurrentRow(3);
+    QApplication::processEvents();
+    auto *unrelatedAssignmentActions = assignmentsTable->cellWidget(0, 5);
+    QVERIFY(unrelatedAssignmentActions);
+    auto *deleteAssignmentButton = unrelatedAssignmentActions->findChild<QPushButton *>(
+        QStringLiteral("deleteAssignmentButton"));
+    QVERIFY(deleteAssignmentButton);
+    m_confirmationOpened = false;
+    scheduleDeleteConfirmation(QMessageBox::Yes);
+    deleteAssignmentButton->click();
+    QVERIFY(m_confirmationOpened);
+    QCOMPARE(assignmentsTable->rowCount(), 0);
+    QCOMPARE(countForSubject(QStringLiteral("assignments"), unrelatedSubjectId), 0);
+    QCOMPARE(countForSubject(QStringLiteral("timetable"), otherUsersSubjectId), 1);
+    QCOMPARE(countForSubject(QStringLiteral("assignments"), otherUsersSubjectId), 1);
 }
 
 QTEST_MAIN(SubjectsUiTests)

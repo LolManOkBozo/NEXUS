@@ -47,6 +47,7 @@ TimetablePage::~TimetablePage() = default;
 void TimetablePage::showEvent(QShowEvent *event)
 {
     QWidget::showEvent(event);
+    refreshTimetable();
     QTimer::singleShot(50, this, [this] { window()->repaint(); });
 }
 
@@ -254,6 +255,10 @@ void TimetablePage::editTimetable(int timetableId)
     const Timetable entry =
         m_timetableService->getTimetable(userId, timetableId, &errorMessage);
     if (entry.id() <= 0) {
+        if (errorMessage == QStringLiteral("Timetable entry not found.")) {
+            refreshTimetable();
+            return;
+        }
         QMessageBox::warning(this, tr("Could Not Load Timetable Entry"),
                              errorMessage.isEmpty() ? tr("Timetable entry not found.")
                                                     : errorMessage);
@@ -307,9 +312,13 @@ void TimetablePage::deleteTimetable(int timetableId)
         return;
     }
 
+    const int userId = m_application->currentUserId();
     QString errorMessage;
-    if (!m_timetableService->deleteTimetable(m_application->currentUserId(),
-                                              timetableId, &errorMessage)) {
+    if (!m_timetableService->deleteTimetable(userId, timetableId, &errorMessage)) {
+        if (errorMessage == QStringLiteral("Timetable entry not found.")) {
+            refreshTimetable();
+            return;
+        }
         QMessageBox::warning(this, tr("Could Not Delete Timetable Entry"), errorMessage);
         return;
     }

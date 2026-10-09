@@ -12,6 +12,7 @@ class SubjectService;
 class QComboBox;
 class QLabel;
 class QTableWidget;
+class QShowEvent;
 
 class AssignmentsPage : public QWidget
 {
@@ -21,13 +22,16 @@ public:
     explicit AssignmentsPage(Application *application, QWidget *parent = nullptr);
     ~AssignmentsPage() override;
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private slots:
     void refreshAssignments();
     void addAssignment();
+    void deleteAssignment(int assignmentId);
 
 private:
     void editAssignment(int assignmentId);
-    void deleteAssignment(int assignmentId);
 
     Application *m_application;
     std::unique_ptr<AssignmentDAO> m_assignmentDAO;
