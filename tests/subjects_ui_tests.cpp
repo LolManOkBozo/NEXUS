@@ -2,6 +2,8 @@
 
 #include <QApplication>
 #include <QAbstractButton>
+#include <QHBoxLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -251,9 +253,24 @@ void SubjectsUiTests::navigateAndManageSubjects()
 
     auto *rowActions = table->cellWidget(0, 5);
     QVERIFY(rowActions);
+    QCOMPARE(rowActions->objectName(), QStringLiteral("subjectActionWidget"));
+    auto *subjectActionLayout = qobject_cast<QHBoxLayout *>(rowActions->layout());
+    QVERIFY(subjectActionLayout);
+    QCOMPARE(subjectActionLayout->contentsMargins(), QMargins(8, 5, 8, 5));
+    QCOMPARE(subjectActionLayout->spacing(), 8);
+    QVERIFY(table->rowHeight(0) >= 50);
+    QVERIFY(table->columnWidth(5) >= 194);
+    const int actionsPosition = table->horizontalHeader()->sectionViewportPosition(5);
+    QVERIFY(actionsPosition >= 0);
+    QVERIFY(actionsPosition + table->columnWidth(5) <= table->viewport()->width());
     auto *editButton = rowActions->findChild<QPushButton *>(
         QStringLiteral("editSubjectButton"));
     QVERIFY(editButton);
+    QCOMPARE(editButton->text(), QStringLiteral("Edit"));
+    QVERIFY(editButton->isEnabled());
+    QVERIFY(editButton->isVisibleTo(table));
+    QVERIFY(editButton->width() >= editButton->minimumWidth());
+    QVERIFY(editButton->height() < table->rowHeight(0) - 10);
     m_dialogOpened = false;
     scheduleSubjectDialog(QStringLiteral("Advanced Data Structures"),
                           QStringLiteral("CSIT-315"), QStringLiteral("Priya Shah"), 4, 3);
@@ -267,6 +284,10 @@ void SubjectsUiTests::navigateAndManageSubjects()
     auto *deleteButton = rowActions->findChild<QPushButton *>(
         QStringLiteral("deleteSubjectButton"));
     QVERIFY(deleteButton);
+    QCOMPARE(deleteButton->text(), QStringLiteral("Delete"));
+    QVERIFY(deleteButton->isEnabled());
+    QVERIFY(deleteButton->isVisibleTo(table));
+    QVERIFY(deleteButton->width() >= deleteButton->minimumWidth());
     scheduleDeleteConfirmation(QMessageBox::No);
     deleteButton->click();
     QVERIFY(m_confirmationOpened);

@@ -6,8 +6,10 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QShowEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include "../../core/application.h"
@@ -32,6 +34,12 @@ SubjectsPage::SubjectsPage(Application *application, QWidget *parent)
 }
 
 SubjectsPage::~SubjectsPage() = default;
+
+void SubjectsPage::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+    QTimer::singleShot(50, this, [this] { window()->repaint(); });
+}
 
 void SubjectsPage::setupUi()
 {
@@ -64,11 +72,15 @@ void SubjectsPage::setupUi()
     m_subjectsTable->setAlternatingRowColors(true);
     m_subjectsTable->verticalHeader()->hide();
     m_subjectsTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    m_subjectsTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    m_subjectsTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
     m_subjectsTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    m_subjectsTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-    m_subjectsTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    m_subjectsTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    m_subjectsTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
+    m_subjectsTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Fixed);
+    m_subjectsTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
+    m_subjectsTable->setColumnWidth(1, 110);
+    m_subjectsTable->setColumnWidth(3, 90);
+    m_subjectsTable->setColumnWidth(4, 110);
+    m_subjectsTable->setColumnWidth(5, 194);
 
     m_emptyState->setObjectName(QStringLiteral("subjectsEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);
@@ -132,16 +144,21 @@ void SubjectsPage::refreshSubjects()
         m_subjectsTable->setItem(row, 4, new QTableWidgetItem(QString::number(subject.semester())));
 
         auto *actionWidget = new QWidget(m_subjectsTable);
+        actionWidget->setObjectName(QStringLiteral("subjectActionWidget"));
         auto *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(4, 2, 4, 2);
-        actionLayout->setSpacing(6);
+        actionLayout->setContentsMargins(8, 5, 8, 5);
+        actionLayout->setSpacing(8);
         auto *editButton = new QPushButton(tr("Edit"), actionWidget);
         editButton->setObjectName(QStringLiteral("editSubjectButton"));
+        editButton->setMinimumWidth(76);
         auto *deleteButton = new QPushButton(tr("Delete"), actionWidget);
         deleteButton->setObjectName(QStringLiteral("deleteSubjectButton"));
+        deleteButton->setMinimumWidth(82);
         actionLayout->addWidget(editButton);
         actionLayout->addWidget(deleteButton);
+        actionWidget->setMinimumWidth(182);
         m_subjectsTable->setCellWidget(row, 5, actionWidget);
+        m_subjectsTable->setRowHeight(row, 50);
         connect(editButton, &QPushButton::clicked, this,
                 [this, subjectId = subject.id()] { editSubject(subjectId); });
         connect(deleteButton, &QPushButton::clicked, this,

@@ -12,6 +12,7 @@ class TimetableDAO;
 class TimetableService;
 class SubjectDAO;
 class SubjectService;
+class QShowEvent;
 
 class TimetablePage : public QWidget
 {
@@ -20,6 +21,9 @@ class TimetablePage : public QWidget
 public:
     explicit TimetablePage(Application *application, QWidget *parent = nullptr);
     ~TimetablePage() override;
+
+protected:
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void refreshTimetable();

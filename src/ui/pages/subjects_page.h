@@ -7,6 +7,7 @@
 class Application;
 class QLabel;
 class QLineEdit;
+class QShowEvent;
 class QTableWidget;
 class SubjectDAO;
 class SubjectService;
@@ -18,6 +19,9 @@ class SubjectsPage : public QWidget
 public:
     explicit SubjectsPage(Application *application, QWidget *parent = nullptr);
     ~SubjectsPage() override;
+
+protected:
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void addSubject();

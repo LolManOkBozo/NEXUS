@@ -50,27 +50,47 @@ QPushButton:pressed {
     background-color: #35383a;
 }
 QPushButton#editAssignmentButton,
-QPushButton#deleteAssignmentButton {
+QPushButton#deleteAssignmentButton,
+QPushButton#editSubjectButton,
+QPushButton#deleteSubjectButton,
+QPushButton#editTimetableButton,
+QPushButton#deleteTimetableButton {
     background-color: #45494c;
     border: 1px solid #62676b;
     padding: 5px 10px;
     border-radius: 4px;
 }
 QPushButton#editAssignmentButton:hover,
-QPushButton#deleteAssignmentButton:hover {
+QPushButton#deleteAssignmentButton:hover,
+QPushButton#editSubjectButton:hover,
+QPushButton#deleteSubjectButton:hover,
+QPushButton#editTimetableButton:hover,
+QPushButton#deleteTimetableButton:hover {
     background-color: #505559;
 }
 QPushButton#editAssignmentButton:pressed,
-QPushButton#deleteAssignmentButton:pressed {
+QPushButton#deleteAssignmentButton:pressed,
+QPushButton#editSubjectButton:pressed,
+QPushButton#deleteSubjectButton:pressed,
+QPushButton#editTimetableButton:pressed,
+QPushButton#deleteTimetableButton:pressed {
     background-color: #383c3f;
+}
+QPushButton#editSubjectButton:disabled,
+QPushButton#deleteSubjectButton:disabled,
+QPushButton#editTimetableButton:disabled,
+QPushButton#deleteTimetableButton:disabled {
+    background-color: #35383a;
+    border-color: #4d5154;
+    color: #a0a0a0;
+}
+QWidget#assignmentActionWidget {
+    background-color: transparent;
 }
 QLabel#assignmentFieldLabel {
     background-color: #3c3f41;
     padding: 5px 8px;
     border-radius: 4px;
-}
-QWidget#assignmentActionWidget {
-    background-color: transparent;
 }
 QLineEdit {
     background-color: #3c3f41;

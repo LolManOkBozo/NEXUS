@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QDateTime>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -311,9 +312,21 @@ void TimetableUiTests::editsEntryAndRefreshesSelectedDay()
     QVERIFY(table);
     auto *actions = table->cellWidget(0, 3);
     QVERIFY(actions);
+    QCOMPARE(actions->objectName(), QStringLiteral("timetableActionWidget"));
+    auto *actionLayout = qobject_cast<QHBoxLayout *>(actions->layout());
+    QVERIFY(actionLayout);
+    QCOMPARE(actionLayout->contentsMargins(), QMargins(8, 5, 8, 5));
+    QCOMPARE(actionLayout->spacing(), 8);
+    QVERIFY(table->rowHeight(0) >= 50);
+    QVERIFY(table->columnWidth(3) >= 194);
     auto *editButton =
         actions->findChild<QPushButton *>(QStringLiteral("editTimetableButton"));
     QVERIFY(editButton);
+    QCOMPARE(editButton->text(), QStringLiteral("Edit"));
+    QVERIFY(editButton->isEnabled());
+    QVERIFY(editButton->isVisibleTo(table));
+    QVERIFY(editButton->width() >= editButton->minimumWidth());
+    QVERIFY(editButton->height() < table->rowHeight(0) - 10);
     scheduleEntryDialog(1, 3, QStringLiteral("13:00"), QStringLiteral("14:30"),
                         QStringLiteral("C-303"));
     editButton->click();
@@ -342,6 +355,10 @@ void TimetableUiTests::deletesEntry()
     auto *deleteButton =
         actions->findChild<QPushButton *>(QStringLiteral("deleteTimetableButton"));
     QVERIFY(deleteButton);
+    QCOMPARE(deleteButton->text(), QStringLiteral("Delete"));
+    QVERIFY(deleteButton->isEnabled());
+    QVERIFY(deleteButton->isVisibleTo(table));
+    QVERIFY(deleteButton->width() >= deleteButton->minimumWidth());
     scheduleMessageBox(QMessageBox::Yes);
     deleteButton->click();
     QVERIFY(m_confirmationOpened);

@@ -7,9 +7,11 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QShowEvent>
 #include <QStringList>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QTimer>
 #include <QVBoxLayout>
 
 #include "../../core/application.h"
@@ -41,6 +43,12 @@ TimetablePage::TimetablePage(Application *application, QWidget *parent)
 }
 
 TimetablePage::~TimetablePage() = default;
+
+void TimetablePage::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+    QTimer::singleShot(50, this, [this] { window()->repaint(); });
+}
 
 void TimetablePage::setupUi()
 {
@@ -82,7 +90,8 @@ void TimetablePage::setupUi()
     m_timetableTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     m_timetableTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_timetableTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    m_timetableTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    m_timetableTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
+    m_timetableTable->setColumnWidth(3, 194);
 
     m_emptyState->setObjectName(QStringLiteral("timetableEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);
@@ -160,16 +169,21 @@ void TimetablePage::refreshTimetable()
         m_timetableTable->setItem(row, 2, new QTableWidgetItem(entry.room()));
 
         auto *actionWidget = new QWidget(m_timetableTable);
+        actionWidget->setObjectName(QStringLiteral("timetableActionWidget"));
         auto *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(4, 2, 4, 2);
-        actionLayout->setSpacing(6);
+        actionLayout->setContentsMargins(8, 5, 8, 5);
+        actionLayout->setSpacing(8);
         auto *editButton = new QPushButton(tr("Edit"), actionWidget);
         editButton->setObjectName(QStringLiteral("editTimetableButton"));
+        editButton->setMinimumWidth(76);
         auto *deleteButton = new QPushButton(tr("Delete"), actionWidget);
         deleteButton->setObjectName(QStringLiteral("deleteTimetableButton"));
+        deleteButton->setMinimumWidth(82);
         actionLayout->addWidget(editButton);
         actionLayout->addWidget(deleteButton);
+        actionWidget->setMinimumWidth(182);
         m_timetableTable->setCellWidget(row, 3, actionWidget);
+        m_timetableTable->setRowHeight(row, 50);
         connect(editButton, &QPushButton::clicked, this,
                 [this, timetableId = entry.id()] { editTimetable(timetableId); });
         connect(deleteButton, &QPushButton::clicked, this,
