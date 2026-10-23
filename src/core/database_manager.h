@@ -26,6 +26,7 @@ public:
 private:
     bool createSchema();
     bool enableForeignKeys();
+    bool migrateAttendanceUniqueness();
 
     QString m_connectionName;
     QString m_customDatabasePath; // If non-empty, use this path instead of the standard location

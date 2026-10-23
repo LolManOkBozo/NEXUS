@@ -86,12 +86,12 @@ void MainWindow::createContent()
     stackedWidget = new QStackedWidget(this);
 
     // Create pages
-    DashboardPage *dashboardPage = new DashboardPage();
+    DashboardPage *dashboardPage = new DashboardPage(m_application);
     SubjectsPage *subjectsPage = new SubjectsPage(m_application);
     TimetablePage *timetablePage = new TimetablePage(m_application);
     AssignmentsPage *assignmentsPage = new AssignmentsPage(m_application);
-    AttendancePage *attendancePage = new AttendancePage();
-    ExamsPage *examsPage = new ExamsPage();
+    AttendancePage *attendancePage = new AttendancePage(m_application);
+    ExamsPage *examsPage = new ExamsPage(m_application);
     NotesPage *notesPage = new NotesPage();
     AITutorPage *aiTutorPage = new AITutorPage();
     AnalyticsPage *analyticsPage = new AnalyticsPage();

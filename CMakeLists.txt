@@ -40,22 +40,37 @@ add_executable(NEXUS
     src/ui/pages/settings_page.cpp
     src/core/database_manager.h
     src/core/database_manager.cpp
+    src/core/attendance_duplicate_recovery.h
+    src/core/attendance_duplicate_recovery.cpp
+    src/core/attendance_uniqueness_migration.h
     src/data/subject_dao.h
     src/data/subject_dao.cpp
     src/data/assignment_dao.h
     src/data/assignment_dao.cpp
     src/data/timetable_dao.h
     src/data/timetable_dao.cpp
+    src/data/attendance_dao.h
+    src/data/attendance_dao.cpp
+    src/data/exam_dao.h
+    src/data/exam_dao.cpp
     src/models/subject.h
     src/models/subject.cpp
     src/models/assignment.h
     src/models/assignment.cpp
+    src/models/attendance.h
+    src/models/attendance.cpp
+    src/models/exam.h
+    src/models/exam.cpp
     src/models/timetable.h
     src/models/timetable.cpp
     src/services/subject_service.h
     src/services/subject_service.cpp
     src/services/assignment_service.h
     src/services/assignment_service.cpp
+    src/services/attendance_service.h
+    src/services/attendance_service.cpp
+    src/services/exam_service.h
+    src/services/exam_service.cpp
     src/services/timetable_service.h
     src/services/timetable_service.cpp
     src/ui/dialogs/subject_dialog.h
@@ -64,6 +79,10 @@ add_executable(NEXUS
     src/ui/dialogs/timetable_entry_dialog.cpp
     src/ui/dialogs/assignment_dialog.h
     src/ui/dialogs/assignment_dialog.cpp
+    src/ui/dialogs/exam_dialog.h
+    src/ui/dialogs/exam_dialog.cpp
+    src/ui/dialogs/attendance_duplicate_recovery_dialog.h
+    src/ui/dialogs/attendance_duplicate_recovery_dialog.cpp
     resources/resources.qrc
 )
 
@@ -141,6 +160,182 @@ if(TARGET Qt6::Test)
     endif()
     add_test(NAME SubjectTests COMMAND nexus_subject_tests)
 
+    add_executable(nexus_attendance_model_tests
+        tests/attendance_model_tests.cpp
+        src/models/attendance.cpp
+        src/models/attendance.h
+    )
+    target_link_libraries(nexus_attendance_model_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_model_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_model_tests)
+    endif()
+    add_test(NAME AttendanceModelTests COMMAND nexus_attendance_model_tests)
+
+    add_executable(nexus_attendance_dao_tests
+        tests/attendance_dao_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+    )
+    target_link_libraries(nexus_attendance_dao_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_dao_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_dao_tests)
+    endif()
+    add_test(NAME AttendanceDAOTests COMMAND nexus_attendance_dao_tests)
+
+    add_executable(nexus_attendance_migration_tests
+        tests/attendance_migration_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+    )
+    target_link_libraries(nexus_attendance_migration_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_migration_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_migration_tests)
+    endif()
+    add_test(NAME AttendanceMigrationTests COMMAND nexus_attendance_migration_tests)
+
+    add_executable(nexus_attendance_duplicate_recovery_tests
+        tests/attendance_duplicate_recovery_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/core/attendance_duplicate_recovery.cpp
+        src/core/attendance_duplicate_recovery.h
+        src/core/attendance_uniqueness_migration.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+    )
+    target_link_libraries(nexus_attendance_duplicate_recovery_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_duplicate_recovery_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_duplicate_recovery_tests)
+    endif()
+    add_test(NAME AttendanceDuplicateRecoveryTests
+        COMMAND nexus_attendance_duplicate_recovery_tests)
+
+    add_executable(nexus_attendance_service_tests
+        tests/attendance_service_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/services/attendance_service.cpp
+        src/services/attendance_service.h
+    )
+    target_link_libraries(nexus_attendance_service_tests
+        PRIVATE
+            Qt6::Core
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_service_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_service_tests)
+    endif()
+    add_test(NAME AttendanceServiceTests COMMAND nexus_attendance_service_tests)
+
+    add_executable(nexus_attendance_ui_tests
+        tests/attendance_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/attendance_service.cpp
+        src/services/attendance_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/ui/pages/attendance_page.cpp
+        src/ui/pages/attendance_page.h
+    )
+    target_link_libraries(nexus_attendance_ui_tests
+        PRIVATE
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_ui_tests)
+    endif()
+    add_test(NAME AttendanceUiTests COMMAND nexus_attendance_ui_tests)
+
+    add_executable(nexus_attendance_duplicate_recovery_ui_tests
+        tests/attendance_duplicate_recovery_ui_tests.cpp
+        src/core/attendance_duplicate_recovery.cpp
+        src/core/attendance_duplicate_recovery.h
+        src/core/attendance_uniqueness_migration.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/ui/dialogs/attendance_duplicate_recovery_dialog.cpp
+        src/ui/dialogs/attendance_duplicate_recovery_dialog.h
+    )
+    target_link_libraries(nexus_attendance_duplicate_recovery_ui_tests
+        PRIVATE
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_attendance_duplicate_recovery_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_attendance_duplicate_recovery_ui_tests)
+    endif()
+    add_test(NAME AttendanceDuplicateRecoveryUiTests
+        COMMAND nexus_attendance_duplicate_recovery_ui_tests)
+
     add_executable(nexus_subject_ui_tests
         tests/subjects_ui_tests.cpp
         src/core/application.cpp
@@ -153,8 +348,16 @@ if(TARGET Qt6::Test)
         src/data/assignment_dao.h
         src/data/timetable_dao.cpp
         src/data/timetable_dao.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/data/exam_dao.cpp
+        src/data/exam_dao.h
         src/models/assignment.cpp
         src/models/assignment.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/models/exam.cpp
+        src/models/exam.h
         src/models/subject.cpp
         src/models/subject.h
         src/models/timetable.cpp
@@ -165,6 +368,10 @@ if(TARGET Qt6::Test)
         src/services/assignment_service.h
         src/services/timetable_service.cpp
         src/services/timetable_service.h
+        src/services/attendance_service.cpp
+        src/services/attendance_service.h
+        src/services/exam_service.cpp
+        src/services/exam_service.h
         src/ui/main_window.cpp
         src/ui/main_window.h
         src/ui/dialogs/subject_dialog.cpp
@@ -173,6 +380,8 @@ if(TARGET Qt6::Test)
         src/ui/dialogs/timetable_entry_dialog.h
         src/ui/dialogs/assignment_dialog.cpp
         src/ui/dialogs/assignment_dialog.h
+        src/ui/dialogs/exam_dialog.cpp
+        src/ui/dialogs/exam_dialog.h
         src/ui/pages/dashboard_page.cpp
         src/ui/pages/dashboard_page.h
         src/ui/pages/subjects_page.cpp
@@ -210,6 +419,14 @@ if(TARGET Qt6::Test)
     get_filename_component(QT_PLATFORM_PLUGIN_DIR
         "${Qt6_DIR}/../../../plugins/platforms" ABSOLUTE)
     set_tests_properties(SubjectUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+    set_tests_properties(AttendanceUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+    set_tests_properties(AttendanceDuplicateRecoveryUiTests PROPERTIES
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )
@@ -378,6 +595,145 @@ if(TARGET Qt6::Test)
     endif()
     add_test(NAME AssignmentUiTests COMMAND nexus_assignment_ui_tests)
     set_tests_properties(AssignmentUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_dashboard_ui_tests
+        tests/dashboard_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/data/exam_dao.cpp
+        src/data/exam_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/data/timetable_dao.cpp
+        src/data/timetable_dao.h
+        src/models/assignment.cpp
+        src/models/assignment.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/models/exam.cpp
+        src/models/exam.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/models/timetable.cpp
+        src/models/timetable.h
+        src/services/assignment_service.cpp
+        src/services/assignment_service.h
+        src/services/attendance_service.cpp
+        src/services/attendance_service.h
+        src/services/exam_service.cpp
+        src/services/exam_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/services/timetable_service.cpp
+        src/services/timetable_service.h
+        src/ui/pages/dashboard_page.cpp
+        src/ui/pages/dashboard_page.h
+    )
+    target_link_libraries(nexus_dashboard_ui_tests
+        PRIVATE
+            Qt6::Widgets
+            Qt6::Core
+            Qt6::Gui
+            Qt6::Sql
+            Qt6::Test
+    )
+    set_target_properties(nexus_dashboard_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_dashboard_ui_tests)
+    endif()
+    add_test(NAME DashboardUiTests COMMAND nexus_dashboard_ui_tests)
+    set_tests_properties(DashboardUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_exam_model_tests
+        tests/exam_model_tests.cpp
+        src/models/exam.cpp
+        src/models/exam.h
+    )
+    target_link_libraries(nexus_exam_model_tests
+        PRIVATE Qt6::Core Qt6::Test
+    )
+    set_target_properties(nexus_exam_model_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_exam_model_tests)
+    endif()
+    add_test(NAME ExamModelTests COMMAND nexus_exam_model_tests)
+
+    add_executable(nexus_exam_service_tests
+        tests/exam_service_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/exam_dao.cpp
+        src/data/exam_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/exam.cpp
+        src/models/exam.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/exam_service.cpp
+        src/services/exam_service.h
+    )
+    target_link_libraries(nexus_exam_service_tests
+        PRIVATE Qt6::Core Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_exam_service_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_exam_service_tests)
+    endif()
+    add_test(NAME ExamServiceTests COMMAND nexus_exam_service_tests)
+
+    add_executable(nexus_exam_ui_tests
+        tests/exam_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/exam_dao.cpp
+        src/data/exam_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/exam.cpp
+        src/models/exam.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/exam_service.cpp
+        src/services/exam_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/ui/dialogs/exam_dialog.cpp
+        src/ui/dialogs/exam_dialog.h
+        src/ui/pages/exams_page.cpp
+        src/ui/pages/exams_page.h
+    )
+    target_link_libraries(nexus_exam_ui_tests
+        PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_exam_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_exam_ui_tests)
+    endif()
+    add_test(NAME ExamUiTests COMMAND nexus_exam_ui_tests)
+    set_tests_properties(ExamUiTests PROPERTIES
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )

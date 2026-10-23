@@ -1,11 +1,125 @@
 // src/core/database_manager.cpp
 #include "database_manager.h"
 
+#include "attendance_uniqueness_migration.h"
+
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QStringList>
 #include <QStandardPaths>
 #include <QDir>
+
+bool ensureAttendanceUniquenessMigration(const QSqlDatabase &database,
+                                         QString *errorMessage)
+{
+    const auto fail = [errorMessage](const QString &message) {
+        if (errorMessage) {
+            *errorMessage = message;
+        }
+        return false;
+    };
+    const QString indexName = QStringLiteral("idx_attendance_user_subject_date");
+    QSqlQuery duplicateQuery(database);
+    if (!duplicateQuery.exec(QStringLiteral(
+            "SELECT user_id, subject_id, date, GROUP_CONCAT(id, ',') "
+            "FROM attendance "
+            "GROUP BY user_id, subject_id, date "
+            "HAVING COUNT(*) > 1 "
+            "ORDER BY user_id, subject_id, date"))) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not check existing records: ")
+                    + duplicateQuery.lastError().text());
+    }
+
+    QStringList conflicts;
+    while (duplicateQuery.next()) {
+        conflicts.append(
+            QStringLiteral("(user_id=%1, subject_id=%2, date='%3', record_ids=%4)")
+                .arg(duplicateQuery.value(0).toString(),
+                     duplicateQuery.value(1).toString(),
+                     duplicateQuery.value(2).toString(),
+                     duplicateQuery.value(3).toString()));
+    }
+    if (duplicateQuery.lastError().isValid()) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not read duplicate records: ")
+                    + duplicateQuery.lastError().text());
+    }
+    if (!conflicts.isEmpty()) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration was aborted. Resolve these "
+                        "duplicate records without deleting or merging data, then retry: %1")
+                        .arg(conflicts.join(QStringLiteral("; "))));
+    }
+
+    QSqlQuery indexListQuery(database);
+    if (!indexListQuery.exec(QStringLiteral("PRAGMA index_list('attendance')"))) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not inspect existing indexes: ")
+                    + indexListQuery.lastError().text());
+    }
+    bool indexAlreadyExists = false;
+    while (indexListQuery.next()) {
+        if (indexListQuery.value(1).toString() == indexName) {
+            indexAlreadyExists = true;
+            if (indexListQuery.value(2).toInt() != 1
+                || indexListQuery.value(4).toInt() != 0) {
+                return fail(QStringLiteral(
+                    "Attendance uniqueness migration found an incompatible index named %1.")
+                                .arg(indexName));
+            }
+            break;
+        }
+    }
+    indexListQuery.finish();
+    if (indexListQuery.lastError().isValid()) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not inspect existing indexes: ")
+                    + indexListQuery.lastError().text());
+    }
+
+    if (!indexAlreadyExists) {
+        QSqlQuery createIndexQuery(database);
+        if (!createIndexQuery.exec(
+                QStringLiteral("CREATE UNIQUE INDEX %1 ON attendance "
+                               "(user_id, subject_id, date)")
+                    .arg(indexName))) {
+            return fail(QStringLiteral(
+                            "Attendance uniqueness migration could not create the unique index: ")
+                        + createIndexQuery.lastError().text());
+        }
+    }
+
+    QSqlQuery indexInfoQuery(database);
+    if (!indexInfoQuery.exec(QStringLiteral("PRAGMA index_info(%1)").arg(indexName))) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not verify the unique index: ")
+                    + indexInfoQuery.lastError().text());
+    }
+    const QStringList expectedColumns{
+        QStringLiteral("user_id"), QStringLiteral("subject_id"), QStringLiteral("date")
+    };
+    QStringList actualColumns;
+    while (indexInfoQuery.next()) {
+        actualColumns.append(indexInfoQuery.value(2).toString());
+    }
+    if (indexInfoQuery.lastError().isValid()) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration could not verify the unique index: ")
+                    + indexInfoQuery.lastError().text());
+    }
+    if (actualColumns != expectedColumns) {
+        return fail(QStringLiteral(
+                        "Attendance uniqueness migration found an index named %1 with "
+                        "unexpected columns.")
+                        .arg(indexName));
+    }
+    if (errorMessage) {
+        errorMessage->clear();
+    }
+    return true;
+}
 
 DatabaseManager::DatabaseManager(const QString& connectionName, const QString& databasePath)
     : m_connectionName(connectionName)
@@ -82,6 +196,7 @@ bool DatabaseManager::initialize()
         return false;
     }
 
+    m_lastError.clear();
     return true;
 }
 
@@ -146,9 +261,8 @@ bool DatabaseManager::enableForeignKeys()
 
 bool DatabaseManager::createSchema()
 {
-    // We'll use a transaction for creating tables to ensure atomicity.
     QSqlQuery query(m_db);
-    if (!query.exec(QStringLiteral("BEGIN TRANSACTION;"))) {
+    if (!query.exec(QStringLiteral("BEGIN IMMEDIATE TRANSACTION;"))) {
         m_lastError = QStringLiteral("Failed to begin transaction: ") + query.lastError().text();
         return false;
     }
@@ -282,10 +396,22 @@ bool DatabaseManager::createSchema()
         }
     }
 
+    if (!migrateAttendanceUniqueness()) {
+        query.exec(QStringLiteral("ROLLBACK;"));
+        return false;
+    }
+
     if (!query.exec(QStringLiteral("COMMIT;"))) {
-        m_lastError = QStringLiteral("Failed to commit transaction: ") + query.lastError().text();
+        const QString commitError = query.lastError().text();
+        query.exec(QStringLiteral("ROLLBACK;"));
+        m_lastError = QStringLiteral("Failed to commit transaction: ") + commitError;
         return false;
     }
 
     return true;
+}
+
+bool DatabaseManager::migrateAttendanceUniqueness()
+{
+    return ensureAttendanceUniquenessMigration(m_db, &m_lastError);
 }

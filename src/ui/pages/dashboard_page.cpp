@@ -1,81 +1,311 @@
-// src/ui/pages/dashboard_page.cpp
 #include "dashboard_page.h"
 
-#include <QVBoxLayout>
-#include <QLabel>
+#include <QDate>
+#include <QDateTime>
 #include <QFrame>
-#include <QHBoxLayout>
 #include <QGridLayout>
+#include <QHash>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QListWidget>
+#include <QShowEvent>
+#include <QStringList>
+#include <QVBoxLayout>
 
-DashboardPage::DashboardPage(QWidget *parent)
-    : QWidget(parent)
+#include "../../core/application.h"
+#include "../../data/assignment_dao.h"
+#include "../../data/attendance_dao.h"
+#include "../../data/exam_dao.h"
+#include "../../data/subject_dao.h"
+#include "../../data/timetable_dao.h"
+#include "../../models/assignment.h"
+#include "../../models/exam.h"
+#include "../../models/subject.h"
+#include "../../models/timetable.h"
+#include "../../services/assignment_service.h"
+#include "../../services/attendance_service.h"
+#include "../../services/exam_service.h"
+#include "../../services/subject_service.h"
+#include "../../services/timetable_service.h"
+
+namespace
 {
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(24, 24, 24, 24);
-    mainLayout->setSpacing(24);
+QFrame *createMetricCard(const QString &title, const QString &valueObjectName,
+                         QLabel **valueLabel, QWidget *parent)
+{
+    auto *card = new QFrame(parent);
+    card->setObjectName(QStringLiteral("dashboardMetricCard"));
+    auto *layout = new QVBoxLayout(card);
+    layout->setContentsMargins(16, 16, 16, 16);
+    layout->setSpacing(4);
 
-    // Welcome header
-    QLabel *welcomeTitle = new QLabel(QStringLiteral("Welcome to NEXUS"), this);
+    auto *titleLabel = new QLabel(title, card);
+    titleLabel->setObjectName(QStringLiteral("dashboardMetricTitle"));
+    *valueLabel = new QLabel(QStringLiteral("—"), card);
+    (*valueLabel)->setObjectName(valueObjectName);
+    (*valueLabel)->setStyleSheet(QStringLiteral("font-size: 24pt; font-weight: bold;"));
+    layout->addWidget(titleLabel);
+    layout->addWidget(*valueLabel);
+    return card;
+}
+
+QFrame *createListPanel(const QString &title, QListWidget **listWidget,
+                        const QString &objectName, QWidget *parent)
+{
+    auto *frame = new QFrame(parent);
+    frame->setObjectName(QStringLiteral("dashboardPanel"));
+    auto *layout = new QVBoxLayout(frame);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(8);
+
+    auto *titleLabel = new QLabel(title, frame);
+    titleLabel->setObjectName(QStringLiteral("dashboardPanelTitle"));
+    *listWidget = new QListWidget(frame);
+    (*listWidget)->setObjectName(objectName);
+    (*listWidget)->setMinimumHeight(220);
+    layout->addWidget(titleLabel);
+    layout->addWidget(*listWidget, 1);
+    return frame;
+}
+
+QString subjectName(const QHash<int, QString> &subjectNames, int subjectId)
+{
+    return subjectNames.value(subjectId, QStringLiteral("Subject unavailable"));
+}
+
+QString examDateFromDatabase(const QString &dateText)
+{
+    const QDate date = QDate::fromString(dateText, Qt::ISODate);
+    return date.isValid() && date.toString(Qt::ISODate) == dateText
+        ? date.toString(QStringLiteral("ddd, MMM d"))
+        : dateText;
+}
+}
+
+DashboardPage::DashboardPage(Application *application, QWidget *parent)
+    : QWidget(parent)
+    , m_application(application)
+{
+    setObjectName(QStringLiteral("dashboardPage"));
+
+    auto *welcomeTitle = new QLabel(tr("Welcome to NEXUS"), this);
     welcomeTitle->setObjectName(QStringLiteral("welcomeTitle"));
-    QLabel *welcomeSubtitle = new QLabel(QStringLiteral("Your academic command center."), this);
+    auto *welcomeSubtitle = new QLabel(
+        tr("Your academic command center."), this);
     welcomeSubtitle->setObjectName(QStringLiteral("welcomeSubtitle"));
 
-    QVBoxLayout *welcomeLayout = new QVBoxLayout;
+    auto *welcomeLayout = new QVBoxLayout;
     welcomeLayout->addWidget(welcomeTitle);
     welcomeLayout->addWidget(welcomeSubtitle);
     welcomeLayout->setSpacing(4);
-    mainLayout->addLayout(welcomeLayout);
 
-    // Overview cards
-    QFrame *cardsFrame = new QFrame(this);
+    auto *cardsFrame = new QFrame(this);
     cardsFrame->setObjectName(QStringLiteral("cardsFrame"));
-    QGridLayout *cardsLayout = new QGridLayout(cardsFrame);
+    auto *cardsLayout = new QGridLayout(cardsFrame);
     cardsLayout->setContentsMargins(0, 0, 0, 0);
     cardsLayout->setSpacing(16);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Subjects"), QStringLiteral("dashboardSubjectCountValue"),
+        &m_subjectCountValue, cardsFrame), 0, 0);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Open Assignments"), QStringLiteral("dashboardPendingAssignmentValue"),
+        &m_pendingAssignmentValue, cardsFrame), 0, 1);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Overdue Assignments"), QStringLiteral("dashboardOverdueAssignmentValue"),
+        &m_overdueAssignmentValue, cardsFrame), 0, 2);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Assignments: Next 7 Days"),
+        QStringLiteral("dashboardUpcomingAssignmentValue"),
+        &m_upcomingAssignmentValue, cardsFrame), 1, 0);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Exams: Next 7 Days"), QStringLiteral("dashboardUpcomingExamValue"),
+        &m_upcomingExamValue, cardsFrame), 1, 1);
+    cardsLayout->addWidget(createMetricCard(
+        tr("Overall Attendance"), QStringLiteral("dashboardAttendanceValue"),
+        &m_attendanceValue, cardsFrame), 1, 2);
 
-    // Helper function to create a card
-    auto createCard = [](const QString &title, const QString &value, QWidget *parent) -> QFrame* {
-        QFrame *card = new QFrame(parent);
-        card->setObjectName(QStringLiteral("card"));
-        QVBoxLayout *cardLayout = new QVBoxLayout(card);
-        cardLayout->setContentsMargins(16, 16, 16, 16);
-        cardLayout->setSpacing(4);
+    m_statusLabel = new QLabel(this);
+    m_statusLabel->setObjectName(QStringLiteral("dashboardStatus"));
+    m_statusLabel->setWordWrap(true);
 
-        QLabel *titleLabel = new QLabel(title, card);
-        titleLabel->setObjectName(QStringLiteral("cardTitle"));
-        QLabel *valueLabel = new QLabel(value, card);
-        valueLabel->setObjectName(QStringLiteral("cardValue"));
-        valueLabel->setStyleSheet(QStringLiteral("font-size: 24pt; font-weight: bold;"));
+    auto *panelsLayout = new QHBoxLayout;
+    panelsLayout->setSpacing(16);
+    panelsLayout->addWidget(createListPanel(
+        tr("Today's Schedule"), &m_todaySchedule,
+        QStringLiteral("dashboardTodaySchedule"), this), 1);
+    panelsLayout->addWidget(createListPanel(
+        tr("Upcoming Assignments and Exams"), &m_upcomingItems,
+        QStringLiteral("dashboardUpcomingItems"), this), 1);
 
-        cardLayout->addWidget(titleLabel);
-        cardLayout->addWidget(valueLabel);
-        return card;
-    };
-
-    // Add cards
-    cardsLayout->addWidget(createCard(QStringLiteral("Today's Classes"), QStringLiteral("3"), this), 0, 0);
-    cardsLayout->addWidget(createCard(QStringLiteral("Pending Assignments"), QStringLiteral("5"), this), 0, 1);
-    cardsLayout->addWidget(createCard(QStringLiteral("Attendance"), QStringLiteral("95%"), this), 0, 2);
-    cardsLayout->addWidget(createCard(QStringLiteral("Upcoming Exams"), QStringLiteral("2"), this), 0, 3);
-
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 24, 24, 24);
+    mainLayout->setSpacing(20);
+    mainLayout->addLayout(welcomeLayout);
     mainLayout->addWidget(cardsFrame);
+    mainLayout->addWidget(m_statusLabel);
+    mainLayout->addLayout(panelsLayout, 1);
 
-    // Schedule section
-    QFrame *scheduleFrame = new QFrame(this);
-    scheduleFrame->setObjectName(QStringLiteral("scheduleFrame"));
-    QVBoxLayout *scheduleLayout = new QVBoxLayout(scheduleFrame);
-    scheduleLayout->setContentsMargins(24, 24, 24, 24);
-    scheduleLayout->setSpacing(8);
+    refreshData();
+}
 
-    QLabel *scheduleTitle = new QLabel(QStringLiteral("Today's Schedule"), scheduleFrame);
-    scheduleTitle->setObjectName(QStringLiteral("scheduleTitle"));
-    QLabel *scheduleContent = new QLabel(QStringLiteral("No classes scheduled yet."), scheduleFrame);
-    scheduleContent->setObjectName(QStringLiteral("scheduleContent"));
-    scheduleContent->setWordWrap(true);
+void DashboardPage::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+    refreshData();
+}
 
-    scheduleLayout->addWidget(scheduleTitle);
-    scheduleLayout->addWidget(scheduleContent);
+void DashboardPage::refreshData()
+{
+    m_subjectCountValue->setText(QStringLiteral("—"));
+    m_pendingAssignmentValue->setText(QStringLiteral("—"));
+    m_overdueAssignmentValue->setText(QStringLiteral("—"));
+    m_upcomingAssignmentValue->setText(QStringLiteral("—"));
+    m_upcomingExamValue->setText(QStringLiteral("—"));
+    m_attendanceValue->setText(tr("No attendance recorded"));
+    m_todaySchedule->clear();
+    m_upcomingItems->clear();
+    m_statusLabel->clear();
 
-    mainLayout->addWidget(scheduleFrame);
-    mainLayout->addStretch();
+    if (!m_application || !m_application->databaseManager()
+        || !m_application->databaseManager()->isOpen()
+        || m_application->currentUserId() <= 0) {
+        m_statusLabel->setText(tr("Dashboard data is unavailable because no current user "
+                                  "database connection is open."));
+        m_todaySchedule->addItem(tr("Today's schedule is unavailable."));
+        m_upcomingItems->addItem(tr("Upcoming items are unavailable."));
+        return;
+    }
+
+    const int userId = m_application->currentUserId();
+    QStringList errors;
+
+    SubjectDAO subjectDAO(m_application->databaseManager());
+    SubjectService subjectService(&subjectDAO);
+    QString subjectError;
+    const QList<Subject> subjects = subjectService.getSubjects(userId, &subjectError);
+    if (!subjectError.isEmpty()) {
+        errors.append(tr("Subjects: %1").arg(subjectError));
+    } else {
+        m_subjectCountValue->setText(QString::number(subjects.size()));
+    }
+    QHash<int, QString> subjectNames;
+    for (const Subject &subject : subjects) {
+        subjectNames.insert(subject.id(), subject.name());
+    }
+
+    const QDate today = QDate::currentDate();
+    const QDate lastUpcomingDay = today.addDays(6);
+    const QDateTime now = QDateTime::currentDateTime();
+
+    AssignmentDAO assignmentDAO(m_application->databaseManager());
+    AssignmentService assignmentService(&assignmentDAO, &subjectDAO);
+    QString assignmentError;
+    const QList<Assignment> assignments =
+        assignmentService.getAssignments(userId, 0, QString(), &assignmentError);
+    if (!assignmentError.isEmpty()) {
+        errors.append(tr("Assignments: %1").arg(assignmentError));
+    } else {
+        int openCount = 0;
+        int overdueCount = 0;
+        int upcomingCount = 0;
+        for (const Assignment &assignment : assignments) {
+            const auto classification =
+                AssignmentService::classifyDeadline(assignment, now);
+            if (assignment.status() != QStringLiteral("Completed")
+                && (assignment.status() == QStringLiteral("Not Started")
+                    || assignment.status() == QStringLiteral("In Progress"))) {
+                ++openCount;
+            }
+            if (classification == AssignmentService::DeadlineClassification::Overdue) {
+                ++overdueCount;
+            }
+            if (classification == AssignmentService::DeadlineClassification::Upcoming) {
+                const QDate dueDate = QDate::fromString(assignment.dueDate(), Qt::ISODate);
+                if (dueDate.isValid() && dueDate <= lastUpcomingDay) {
+                    ++upcomingCount;
+                    QString item = tr("Assignment · %1 · %2")
+                        .arg(assignment.title(),
+                             subjectName(subjectNames, assignment.subjectId()));
+                    if (!assignment.dueTime().isEmpty()) {
+                        item += QStringLiteral(" · %1").arg(assignment.dueTime());
+                    }
+                    m_upcomingItems->addItem(
+                        QStringLiteral("%1 — %2")
+                            .arg(assignment.dueDate(), item));
+                }
+            }
+        }
+        m_pendingAssignmentValue->setText(QString::number(openCount));
+        m_overdueAssignmentValue->setText(QString::number(overdueCount));
+        m_upcomingAssignmentValue->setText(QString::number(upcomingCount));
+    }
+
+    TimetableDAO timetableDAO(m_application->databaseManager());
+    TimetableService timetableService(&timetableDAO);
+    QString timetableError;
+    const QList<Timetable> todayEntries =
+        timetableService.getTimetablesForDay(userId, today.dayOfWeek(), &timetableError);
+    if (!timetableError.isEmpty()) {
+        errors.append(tr("Today's timetable: %1").arg(timetableError));
+    } else if (todayEntries.isEmpty()) {
+        m_todaySchedule->addItem(tr("No classes scheduled for today."));
+    } else {
+        for (const Timetable &entry : todayEntries) {
+            QString item = QStringLiteral("%1–%2 · %3")
+                .arg(entry.startTime(), entry.endTime(),
+                     subjectName(subjectNames, entry.subjectId()));
+            if (!entry.room().trimmed().isEmpty()) {
+                item += QStringLiteral(" · %1").arg(entry.room().trimmed());
+            }
+            m_todaySchedule->addItem(item);
+        }
+    }
+
+    ExamDAO examDAO(m_application->databaseManager());
+    ExamService examService(&examDAO, &subjectDAO);
+    QString examError;
+    const QList<Exam> exams = examService.getExams(userId, &examError);
+    if (!examError.isEmpty()) {
+        errors.append(tr("Exams: %1").arg(examError));
+    } else {
+        int examCount = 0;
+        for (const Exam &exam : exams) {
+            const QDate examDate = QDate::fromString(exam.examDate(), Qt::ISODate);
+            if (!examDate.isValid()
+                || examDate.toString(Qt::ISODate) != exam.examDate()
+                || examDate < today || examDate > lastUpcomingDay) {
+                continue;
+            }
+            ++examCount;
+            QString item = tr("Exam · %1 · %2")
+                .arg(exam.title(), subjectName(subjectNames, exam.subjectId()));
+            if (!exam.startTime().isEmpty()) {
+                item += QStringLiteral(" · %1").arg(exam.startTime());
+            }
+            if (!exam.room().trimmed().isEmpty()) {
+                item += QStringLiteral(" · %1").arg(exam.room().trimmed());
+            }
+            m_upcomingItems->addItem(
+                QStringLiteral("%1 — %2")
+                    .arg(examDateFromDatabase(exam.examDate()), item));
+        }
+        m_upcomingExamValue->setText(QString::number(examCount));
+    }
+
+    if (m_upcomingItems->count() == 0) {
+        m_upcomingItems->addItem(tr("No assignments or exams due in the next 7 days."));
+    }
+
+    AttendanceDAO attendanceDAO(m_application->databaseManager());
+    AttendanceService attendanceService(&attendanceDAO);
+    QString attendanceError;
+    const std::optional<double> attendance =
+        attendanceService.overallAttendancePercentage(userId, &attendanceError);
+    if (!attendanceError.isEmpty()) {
+        errors.append(tr("Attendance: %1").arg(attendanceError));
+    } else if (attendance.has_value()) {
+        m_attendanceValue->setText(tr("%1%").arg(*attendance, 0, 'f', 1));
+    }
+
+    m_statusLabel->setText(errors.join(QLatin1Char('\n')));
 }
