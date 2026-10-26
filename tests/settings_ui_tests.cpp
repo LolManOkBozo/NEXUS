@@ -28,14 +28,21 @@ private slots:
     void cleanupTestCase();
 
     void loadsAndPersistsSettings();
+    void preservesExistingUserOnRestart();
 };
 
 void SettingsUiTests::initTestCase()
 {
     QVERIFY(m_temporaryDirectory.isValid());
-    m_application = new Application(
-        m_temporaryDirectory.filePath(QStringLiteral("settings_ui_tests.db")));
+    const QString dbPath = m_temporaryDirectory.filePath(QStringLiteral("settings_ui_tests.db"));
+    {
+        Application setupApp(dbPath);
+        QVERIFY(setupApp.initialize());
+    }
+    m_application = new Application(dbPath);
     QVERIFY2(m_application->initialize(), qPrintable(m_application->lastError()));
+    QSqlQuery q(m_application->databaseManager()->database());
+    q.exec(QStringLiteral("UPDATE users SET name = 'NEXUS Demo User', email = 'demo@nexus.local' WHERE id = ") + QString::number(m_application->currentUserId()));
 }
 
 void SettingsUiTests::init()
@@ -84,6 +91,29 @@ void SettingsUiTests::loadsAndPersistsSettings()
     QVERIFY(query.exec(QStringLiteral("SELECT name, email FROM users WHERE email = 'updated-demo@nexus.local'")));
     QVERIFY(query.next());
     QCOMPARE(query.value(0).toString(), QStringLiteral("Updated Demo User"));
+
+    // Test saving with the same email (should succeed without unique constraint failure)
+    saveButton->click();
+    QApplication::processEvents();
+    QCOMPARE(m_page->findChild<QLabel *>(QStringLiteral("settingsStatus"))->text(),
+             QStringLiteral("Settings successfully saved."));
+}
+
+void SettingsUiTests::preservesExistingUserOnRestart()
+{
+    const QString dbPath = m_temporaryDirectory.filePath(QStringLiteral("restart_test.db"));
+    {
+        Application app1(dbPath);
+        QVERIFY(app1.initialize());
+        QSqlQuery q(app1.databaseManager()->database());
+        QVERIFY(q.exec(QStringLiteral("INSERT INTO users (id, name, email, created_at) VALUES (99, 'Existing User', 'existing@example.test', '2026-01-01T00:00:00Z')")));
+    }
+
+    {
+        Application app2(dbPath);
+        QVERIFY(app2.initialize());
+        QCOMPARE(app2.currentUserId(), 99);
+    }
 }
 
 QTEST_MAIN(SettingsUiTests)

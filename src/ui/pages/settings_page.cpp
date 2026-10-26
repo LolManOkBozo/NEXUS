@@ -134,6 +134,16 @@ void SettingsPage::saveSettings()
     }
 
     const int userId = m_application->currentUserId();
+    QSqlQuery checkQuery(m_application->databaseManager()->database());
+    if (checkQuery.prepare(QStringLiteral("SELECT id FROM users WHERE email = :email AND id != :id"))) {
+        checkQuery.bindValue(QStringLiteral(":email"), email);
+        checkQuery.bindValue(QStringLiteral(":id"), userId);
+        if (checkQuery.exec() && checkQuery.next()) {
+            m_statusLabel->setText(tr("Could not update profile: Email address is already in use by another user."));
+            return;
+        }
+    }
+
     QSqlQuery query(m_application->databaseManager()->database());
     if (!query.prepare(QStringLiteral("UPDATE users SET name = :name, email = :email WHERE id = :id"))) {
         m_statusLabel->setText(query.lastError().text());
