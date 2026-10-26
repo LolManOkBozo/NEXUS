@@ -14,6 +14,7 @@
 #include <QSettings>
 
 #include "../../core/application.h"
+#include "../../core/theme_manager.h"
 
 SettingsPage::SettingsPage(Application *application, QWidget *parent)
     : QWidget(parent)
@@ -38,8 +39,8 @@ SettingsPage::SettingsPage(Application *application, QWidget *parent)
     m_emailEdit->setObjectName(QStringLiteral("settingsEmailEdit"));
     
     m_themeCombo->setObjectName(QStringLiteral("settingsThemeCombo"));
-    m_themeCombo->addItem(tr("Dark Theme (Default)"), QStringLiteral("dark"));
-    m_themeCombo->addItem(tr("Classic Dark"), QStringLiteral("classic"));
+    m_themeCombo->addItem(tr("Dark Mode"), QStringLiteral("dark"));
+    m_themeCombo->addItem(tr("Light Mode"), QStringLiteral("light"));
 
     m_saveButton->setObjectName(QStringLiteral("settingsSaveButton"));
 
@@ -160,6 +161,7 @@ void SettingsPage::saveSettings()
 
     QSettings settings(QStringLiteral("NEXUS"), QStringLiteral("NEXUS"));
     settings.setValue(QStringLiteral("theme"), m_themeCombo->currentData().toString());
+    ThemeManager::instance().setTheme(ThemeManager::instance().stringToTheme(m_themeCombo->currentData().toString()));
 
     m_statusLabel->setText(tr("Settings successfully saved."));
 }

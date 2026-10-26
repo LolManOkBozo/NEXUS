@@ -166,7 +166,27 @@ bool DatabaseManager::initialize()
             return false;
         }
 
-        databaseFilePath = dir.filePath(QStringLiteral("nexus.db"));
+        QString primaryPath = dir.filePath(QStringLiteral("nexus.db"));
+        databaseFilePath = primaryPath;
+
+        QDir parentDir = dir;
+        if (parentDir.cdUp()) {
+            QString legacyPath = parentDir.filePath(QStringLiteral("nexus.db"));
+            if (QFileInfo::exists(legacyPath) && !QFileInfo::exists(primaryPath)) {
+                databaseFilePath = legacyPath;
+            } else if (QFileInfo::exists(legacyPath) && QFileInfo::exists(primaryPath)) {
+                QSqlDatabase tempDb = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), m_connectionName + QStringLiteral("_chk"));
+                tempDb.setDatabaseName(legacyPath);
+                if (tempDb.open()) {
+                    QSqlQuery chkQ(tempDb);
+                    if (chkQ.exec(QStringLiteral("SELECT COUNT(*) FROM users WHERE email != 'demo@nexus.local'")) && chkQ.next() && chkQ.value(0).toInt() > 0) {
+                        databaseFilePath = legacyPath;
+                    }
+                    tempDb.close();
+                }
+                QSqlDatabase::removeDatabase(m_connectionName + QStringLiteral("_chk"));
+            }
+        }
     }
 
     // Add or retrieve the database connection

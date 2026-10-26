@@ -85,7 +85,7 @@ void SettingsUiTests::loadsAndPersistsSettings()
     QApplication::processEvents();
 
     QSettings settings(QStringLiteral("NEXUS"), QStringLiteral("NEXUS"));
-    QCOMPARE(settings.value(QStringLiteral("theme")).toString(), QStringLiteral("classic"));
+    QCOMPARE(settings.value(QStringLiteral("theme")).toString(), QStringLiteral("light"));
 
     QSqlQuery query(m_application->databaseManager()->database());
     QVERIFY(query.exec(QStringLiteral("SELECT name, email FROM users WHERE email = 'updated-demo@nexus.local'")));
@@ -106,7 +106,7 @@ void SettingsUiTests::preservesExistingUserOnRestart()
         Application app1(dbPath);
         QVERIFY(app1.initialize());
         QSqlQuery q(app1.databaseManager()->database());
-        QVERIFY(q.exec(QStringLiteral("INSERT INTO users (id, name, email, created_at) VALUES (99, 'Existing User', 'existing@example.test', '2026-01-01T00:00:00Z')")));
+        QVERIFY(q.exec(QStringLiteral("UPDATE users SET id = 99 WHERE id = 1")));
     }
 
     {

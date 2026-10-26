@@ -24,7 +24,7 @@ bool Application::initialize()
     }
 
     QSqlQuery query(m_databaseManager.database());
-    if (!query.exec(QStringLiteral("SELECT id FROM users WHERE email = 'demo@nexus.local'"))) {
+    if (!query.exec(QStringLiteral("SELECT id FROM users WHERE email != 'demo@nexus.local' ORDER BY id ASC LIMIT 1"))) {
         m_lastError = query.lastError().text();
         return false;
     }
@@ -32,28 +32,36 @@ bool Application::initialize()
     if (query.next()) {
         m_currentUserId = query.value(0).toInt();
     } else {
-        if (!query.exec(QStringLiteral("SELECT id FROM users ORDER BY id ASC LIMIT 1"))) {
+        if (!query.exec(QStringLiteral("SELECT id FROM users WHERE email = 'demo@nexus.local'"))) {
             m_lastError = query.lastError().text();
             return false;
         }
         if (query.next()) {
             m_currentUserId = query.value(0).toInt();
         } else {
-            if (!query.prepare(QStringLiteral(
-                    "INSERT INTO users (name, email, created_at) "
-                    "VALUES (:name, :email, :created_at)"))) {
+            if (!query.exec(QStringLiteral("SELECT id FROM users ORDER BY id ASC LIMIT 1"))) {
                 m_lastError = query.lastError().text();
                 return false;
             }
-            query.bindValue(QStringLiteral(":name"), QStringLiteral("NEXUS Demo User"));
-            query.bindValue(QStringLiteral(":email"), QStringLiteral("demo@nexus.local"));
-            query.bindValue(QStringLiteral(":created_at"),
-                            QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
-            if (!query.exec()) {
-                m_lastError = query.lastError().text();
-                return false;
+            if (query.next()) {
+                m_currentUserId = query.value(0).toInt();
+            } else {
+                if (!query.prepare(QStringLiteral(
+                        "INSERT INTO users (name, email, created_at) "
+                        "VALUES (:name, :email, :created_at)"))) {
+                    m_lastError = query.lastError().text();
+                    return false;
+                }
+                query.bindValue(QStringLiteral(":name"), QStringLiteral("NEXUS Demo User"));
+                query.bindValue(QStringLiteral(":email"), QStringLiteral("demo@nexus.local"));
+                query.bindValue(QStringLiteral(":created_at"),
+                                QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
+                if (!query.exec()) {
+                    m_lastError = query.lastError().text();
+                    return false;
+                }
+                m_currentUserId = query.lastInsertId().toInt();
             }
-            m_currentUserId = query.lastInsertId().toInt();
         }
     }
 

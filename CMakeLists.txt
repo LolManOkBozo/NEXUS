@@ -40,6 +40,8 @@ add_executable(NEXUS
     src/ui/pages/settings_page.cpp
     src/core/database_manager.h
     src/core/database_manager.cpp
+    src/core/theme_manager.h
+    src/core/theme_manager.cpp
     src/core/attendance_duplicate_recovery.h
     src/core/attendance_duplicate_recovery.cpp
     src/core/attendance_uniqueness_migration.h
@@ -418,6 +420,8 @@ if(TARGET Qt6::Test)
         src/ui/pages/analytics_page.h
         src/ui/pages/settings_page.cpp
         src/ui/pages/settings_page.h
+        src/core/theme_manager.h
+        src/core/theme_manager.cpp
         resources/resources.qrc
     )
     target_link_libraries(nexus_subject_ui_tests
@@ -890,6 +894,8 @@ if(TARGET Qt6::Test)
         src/core/application.h
         src/core/database_manager.cpp
         src/core/database_manager.h
+        src/core/theme_manager.h
+        src/core/theme_manager.cpp
         src/ui/pages/settings_page.cpp
         src/ui/pages/settings_page.h
     )
