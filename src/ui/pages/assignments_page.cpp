@@ -86,8 +86,7 @@ AssignmentsPage::AssignmentsPage(Application *application, QWidget *parent)
     m_assignmentTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     m_assignmentTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     m_assignmentTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    m_assignmentTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
-    m_assignmentTable->setColumnWidth(5, 194);
+    m_assignmentTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
 
     m_emptyState->setObjectName(QStringLiteral("assignmentsEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);

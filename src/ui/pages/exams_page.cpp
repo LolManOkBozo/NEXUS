@@ -66,8 +66,7 @@ ExamsPage::ExamsPage(Application *application, QWidget *parent)
     m_examTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     m_examTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     m_examTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    m_examTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
-    m_examTable->setColumnWidth(5, 194);
+    m_examTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
 
     m_emptyState->setObjectName(QStringLiteral("examsEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);

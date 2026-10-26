@@ -63,8 +63,7 @@ NotesPage::NotesPage(Application *application, QWidget *parent)
     m_noteTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     m_noteTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     m_noteTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
-    m_noteTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Fixed);
-    m_noteTable->setColumnWidth(4, 194);
+    m_noteTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
 
     m_emptyState->setObjectName(QStringLiteral("notesEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);

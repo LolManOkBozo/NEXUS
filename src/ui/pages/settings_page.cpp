@@ -67,7 +67,7 @@ SettingsPage::SettingsPage(Application *application, QWidget *parent)
     m_statusLabel->setWordWrap(true);
 
     auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
+    layout->setContentsMargins(40, 40, 40, 40);
     layout->setSpacing(20);
     layout->addWidget(title);
     layout->addWidget(description);
