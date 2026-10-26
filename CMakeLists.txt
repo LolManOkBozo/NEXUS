@@ -53,6 +53,8 @@ add_executable(NEXUS
     src/data/attendance_dao.cpp
     src/data/exam_dao.h
     src/data/exam_dao.cpp
+    src/data/notes_dao.h
+    src/data/notes_dao.cpp
     src/models/subject.h
     src/models/subject.cpp
     src/models/assignment.h
@@ -61,6 +63,8 @@ add_executable(NEXUS
     src/models/attendance.cpp
     src/models/exam.h
     src/models/exam.cpp
+    src/models/note.h
+    src/models/note.cpp
     src/models/timetable.h
     src/models/timetable.cpp
     src/services/subject_service.h
@@ -71,6 +75,8 @@ add_executable(NEXUS
     src/services/attendance_service.cpp
     src/services/exam_service.h
     src/services/exam_service.cpp
+    src/services/notes_service.h
+    src/services/notes_service.cpp
     src/services/timetable_service.h
     src/services/timetable_service.cpp
     src/ui/dialogs/subject_dialog.h
@@ -81,6 +87,8 @@ add_executable(NEXUS
     src/ui/dialogs/assignment_dialog.cpp
     src/ui/dialogs/exam_dialog.h
     src/ui/dialogs/exam_dialog.cpp
+    src/ui/dialogs/note_dialog.h
+    src/ui/dialogs/note_dialog.cpp
     src/ui/dialogs/attendance_duplicate_recovery_dialog.h
     src/ui/dialogs/attendance_duplicate_recovery_dialog.cpp
     resources/resources.qrc
@@ -352,12 +360,16 @@ if(TARGET Qt6::Test)
         src/data/attendance_dao.h
         src/data/exam_dao.cpp
         src/data/exam_dao.h
+        src/data/notes_dao.cpp
+        src/data/notes_dao.h
         src/models/assignment.cpp
         src/models/assignment.h
         src/models/attendance.cpp
         src/models/attendance.h
         src/models/exam.cpp
         src/models/exam.h
+        src/models/note.cpp
+        src/models/note.h
         src/models/subject.cpp
         src/models/subject.h
         src/models/timetable.cpp
@@ -372,6 +384,8 @@ if(TARGET Qt6::Test)
         src/services/attendance_service.h
         src/services/exam_service.cpp
         src/services/exam_service.h
+        src/services/notes_service.cpp
+        src/services/notes_service.h
         src/ui/main_window.cpp
         src/ui/main_window.h
         src/ui/dialogs/subject_dialog.cpp
@@ -382,6 +396,8 @@ if(TARGET Qt6::Test)
         src/ui/dialogs/assignment_dialog.h
         src/ui/dialogs/exam_dialog.cpp
         src/ui/dialogs/exam_dialog.h
+        src/ui/dialogs/note_dialog.cpp
+        src/ui/dialogs/note_dialog.h
         src/ui/pages/dashboard_page.cpp
         src/ui/pages/dashboard_page.h
         src/ui/pages/subjects_page.cpp
@@ -734,6 +750,88 @@ if(TARGET Qt6::Test)
     endif()
     add_test(NAME ExamUiTests COMMAND nexus_exam_ui_tests)
     set_tests_properties(ExamUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_note_model_tests
+        tests/note_model_tests.cpp
+        src/models/note.cpp
+        src/models/note.h
+    )
+    target_link_libraries(nexus_note_model_tests
+        PRIVATE Qt6::Core Qt6::Test
+    )
+    set_target_properties(nexus_note_model_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_note_model_tests)
+    endif()
+    add_test(NAME NoteModelTests COMMAND nexus_note_model_tests)
+
+    add_executable(nexus_notes_service_tests
+        tests/notes_service_tests.cpp
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/notes_dao.cpp
+        src/data/notes_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/note.cpp
+        src/models/note.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/notes_service.cpp
+        src/services/notes_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+    )
+    target_link_libraries(nexus_notes_service_tests
+        PRIVATE Qt6::Core Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_notes_service_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_notes_service_tests)
+    endif()
+    add_test(NAME NotesServiceTests COMMAND nexus_notes_service_tests)
+
+    add_executable(nexus_notes_ui_tests
+        tests/notes_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/notes_dao.cpp
+        src/data/notes_dao.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/models/note.cpp
+        src/models/note.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/services/notes_service.cpp
+        src/services/notes_service.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/ui/dialogs/note_dialog.cpp
+        src/ui/dialogs/note_dialog.h
+        src/ui/pages/notes_page.cpp
+        src/ui/pages/notes_page.h
+    )
+    target_link_libraries(nexus_notes_ui_tests
+        PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_notes_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_notes_ui_tests)
+    endif()
+    add_test(NAME NotesUiTests COMMAND nexus_notes_ui_tests)
+    set_tests_properties(NotesUiTests PROPERTIES
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )

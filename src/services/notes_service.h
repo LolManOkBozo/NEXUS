@@ -1,11 +1,24 @@
-#include <QString>
+#pragma once
+
 #include <QList>
-#include <QMap>
+#include <QString>
+
+class NotesDAO;
+class Note;
 
 class NotesService {
 public:
-    virtual QList<Note> listNotes(const QString& userId) = 0;
-    virtual QString createNote(const QString& title, const QString& content, const QString& subjectId, const QString& userId) = 0;
-    virtual QString updateNote(const QString& id, const QString& title, const QString& content, const QString& subjectId, const QString& userId) = 0;
-    virtual QString deleteNote(const QString& id) = 0;
+    explicit NotesService(NotesDAO *notesDAO);
+    ~NotesService() = default;
+
+    bool addNote(const Note &note, QString *errorMessage = nullptr) const;
+    QList<Note> getNotes(int userId, QString *errorMessage = nullptr) const;
+    Note getNote(int userId, int noteId, QString *errorMessage = nullptr) const;
+    bool updateNote(const Note &note, QString *errorMessage = nullptr) const;
+    bool deleteNote(int userId, int noteId, QString *errorMessage = nullptr) const;
+
+private:
+    static bool validateAndNormalize(Note &note, QString *errorMessage);
+
+    NotesDAO *m_notesDAO;
 };

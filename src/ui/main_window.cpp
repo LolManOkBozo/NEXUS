@@ -92,7 +92,7 @@ void MainWindow::createContent()
     AssignmentsPage *assignmentsPage = new AssignmentsPage(m_application);
     AttendancePage *attendancePage = new AttendancePage(m_application);
     ExamsPage *examsPage = new ExamsPage(m_application);
-    NotesPage *notesPage = new NotesPage();
+    NotesPage *notesPage = new NotesPage(m_application);
     AITutorPage *aiTutorPage = new AITutorPage();
     AnalyticsPage *analyticsPage = new AnalyticsPage();
     SettingsPage *settingsPage = new SettingsPage();

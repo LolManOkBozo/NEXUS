@@ -1,9 +1,22 @@
+#pragma once
+
+#include <QList>
 #include <QString>
+
+class DatabaseManager;
+class Note;
 
 class NotesDAO {
 public:
-    virtual QString createNote(const QString& title, const QString& content, const QString& subjectId, const QString& userId) = 0;
-    virtual QString updateNote(const QString& id, const QString& title, const QString& content, const QString& subjectId, const QString& userId) = 0;
-    virtual QString deleteNote(const QString& id) = 0;
-    virtual QList<Note> listNotes(const QString& userId) = 0;
+    explicit NotesDAO(DatabaseManager *databaseManager);
+    ~NotesDAO() = default;
+
+    bool insertNote(const Note &note, QString *errorMessage = nullptr) const;
+    QList<Note> getNotesByUserId(int userId, QString *errorMessage = nullptr) const;
+    Note getNoteById(int userId, int noteId, QString *errorMessage = nullptr) const;
+    bool updateNote(const Note &note, QString *errorMessage = nullptr) const;
+    bool deleteNote(int userId, int noteId, QString *errorMessage = nullptr) const;
+
+private:
+    DatabaseManager *m_databaseManager;
 };
