@@ -1,0 +1,46 @@
+A:\NEXUS\tests\notes_ui_tests.cpp: In member function 'int NotesUiTests::insertNote(int, int, const QString&)':
+A:\NEXUS\tests\notes_ui_tests.cpp:124:49: error: qualified-id in declaration before '(' token
+  124 | void NotesUiTests::showsEmptyStateAndScopesNotes()
+      |                                                 ^
+A:\NEXUS\tests\notes_ui_tests.cpp:146:44: error: qualified-id in declaration before '(' token
+  146 | void NotesUiTests::addsEditsAndDeletesNotes()
+      |                                            ^
+In file included from C:/Qt/6.12.0/mingw_64/include/QtTest/QtTest:11,
+                 from A:\NEXUS\tests\notes_ui_tests.cpp:1:
+A:\NEXUS\tests\notes_ui_tests.cpp:185:1: error: a function-definition is not allowed here before '{' token
+  185 | QTEST_MAIN(NotesUiTests)
+      | ^~~~~~~~~~
+In file included from A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:11,
+                 from A:\NEXUS\tests\notes_ui_tests.cpp:186:
+C:/Qt/6.12.0/mingw_64/include/QtCore/qtmochelpers.h:30:1: error: 'namespace' definition is not allowed here
+   30 | namespace QtMocHelpers {
+      | ^~~~~~~~~
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:32:11: error: expected identifier before '{' token
+   32 | namespace {
+      |           ^
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:36:1: error: a template declaration cannot appear at block scope
+   36 | template <> constexpr inline auto NotesUiTests::qt_create_metaobjectdata<qt_meta_tag_ZN12NotesUiTestsE_t>()
+      | ^~~~~~~~
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:81:38: error: qualified-id in declaration before '(' token
+   81 | void NotesUiTests::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+      |                                      ^
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:98:44: error: qualified-id in declaration before '(' token
+   98 | const QMetaObject *NotesUiTests::metaObject() const
+      |                                            ^
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:103:32: error: qualified-id in declaration before '(' token
+  103 | void *NotesUiTests::qt_metacast(const char *_clname)
+      |                                ^
+A:/NEXUS/build/nexus_notes_ui_tests_autogen/include/notes_ui_tests.moc:111:30: error: qualified-id in declaration before '(' token
+  111 | int NotesUiTests::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+      |                              ^
+A:\NEXUS\tests\notes_ui_tests.cpp:188:34: error: qualified-id in declaration before '(' token
+  188 | void NotesUiTests::fillNoteDialog(const QString &title)
+      |                                  ^
+A:\NEXUS\tests\notes_ui_tests.cpp:208:1: warning: control reaches end of non-void function [-Wreturn-type]
+  208 | }
+      | ^
+mingw32-make[3]: *** [CMakeFiles\nexus_notes_ui_tests.dir\build.make:101: CMakeFiles/nexus_notes_ui_tests.dir/tests/notes_ui_tests.cpp.obj] Error 1
+mingw32-make[3]: *** Waiting for unfinished jobs....
+mingw32-make[2]: *** [CMakeFiles\Makefile2:963: CMakeFiles/nexus_notes_ui_tests.dir/all] Error 2
+mingw32-make[1]: *** [CMakeFiles\Makefile2:970: CMakeFiles/nexus_notes_ui_tests.dir/rule] Error 2
+mingw32-make: *** [Makefile:432: nexus_notes_ui_tests] Error 2

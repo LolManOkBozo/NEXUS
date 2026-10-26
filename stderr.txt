@@ -1,0 +1,8 @@
+Unknown test function: ';'.
+Unknown test function: 'echo'.
+Unknown test function: 'EXIT_CODE'.
+Unknown test function: '0'.
+
+build\nexus_notes_service_tests.exe -functions
+lists all available test functions.
+

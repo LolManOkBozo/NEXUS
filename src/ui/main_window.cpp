@@ -94,8 +94,8 @@ void MainWindow::createContent()
     ExamsPage *examsPage = new ExamsPage(m_application);
     NotesPage *notesPage = new NotesPage(m_application);
     AITutorPage *aiTutorPage = new AITutorPage();
-    AnalyticsPage *analyticsPage = new AnalyticsPage();
-    SettingsPage *settingsPage = new SettingsPage();
+    AnalyticsPage *analyticsPage = new AnalyticsPage(m_application);
+    SettingsPage *settingsPage = new SettingsPage(m_application);
 
     // Add pages to stacked widget
     stackedWidget->addWidget(dashboardPage);

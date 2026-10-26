@@ -835,4 +835,76 @@ if(TARGET Qt6::Test)
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )
+
+    add_executable(nexus_analytics_ui_tests
+        tests/analytics_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/data/subject_dao.cpp
+        src/data/subject_dao.h
+        src/data/assignment_dao.cpp
+        src/data/assignment_dao.h
+        src/data/attendance_dao.cpp
+        src/data/attendance_dao.h
+        src/data/exam_dao.cpp
+        src/data/exam_dao.h
+        src/models/subject.cpp
+        src/models/subject.h
+        src/models/assignment.cpp
+        src/models/assignment.h
+        src/models/attendance.cpp
+        src/models/attendance.h
+        src/models/exam.cpp
+        src/models/exam.h
+        src/services/subject_service.cpp
+        src/services/subject_service.h
+        src/services/assignment_service.cpp
+        src/services/assignment_service.h
+        src/services/attendance_service.cpp
+        src/services/attendance_service.h
+        src/services/exam_service.cpp
+        src/services/exam_service.h
+        src/ui/pages/analytics_page.cpp
+        src/ui/pages/analytics_page.h
+    )
+    target_link_libraries(nexus_analytics_ui_tests
+        PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_analytics_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_analytics_ui_tests)
+    endif()
+    add_test(NAME AnalyticsUiTests COMMAND nexus_analytics_ui_tests)
+    set_tests_properties(AnalyticsUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_settings_ui_tests
+        tests/settings_ui_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/ui/pages/settings_page.cpp
+        src/ui/pages/settings_page.h
+    )
+    target_link_libraries(nexus_settings_ui_tests
+        PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_settings_ui_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_settings_ui_tests)
+    endif()
+    add_test(NAME SettingsUiTests COMMAND nexus_settings_ui_tests)
+    set_tests_properties(SettingsUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
 endif()

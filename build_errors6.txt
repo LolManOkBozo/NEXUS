@@ -1,0 +1,14 @@
+A:\NEXUS\tests\notes_ui_tests.cpp:213:5: error: expected unqualified-id before 'delete'
+  213 |     delete m_page;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_ui_tests.cpp:214:5: error: 'm_page' does not name a type
+  214 |     m_page = nullptr;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_ui_tests.cpp:215:1: error: expected declaration before '}' token
+  215 | }
+      | ^
+mingw32-make[3]: *** [CMakeFiles\nexus_notes_ui_tests.dir\build.make:101: CMakeFiles/nexus_notes_ui_tests.dir/tests/notes_ui_tests.cpp.obj] Error 1
+mingw32-make[3]: *** Waiting for unfinished jobs....
+mingw32-make[2]: *** [CMakeFiles\Makefile2:963: CMakeFiles/nexus_notes_ui_tests.dir/all] Error 2
+mingw32-make[1]: *** [CMakeFiles\Makefile2:970: CMakeFiles/nexus_notes_ui_tests.dir/rule] Error 2
+mingw32-make: *** [Makefile:432: nexus_notes_ui_tests] Error 2

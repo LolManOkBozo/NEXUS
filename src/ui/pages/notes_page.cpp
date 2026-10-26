@@ -78,16 +78,16 @@ NotesPage::NotesPage(Application *application, QWidget *parent)
     auto *emptyAddButton = new QPushButton(tr("Add Note"), m_emptyState);
     emptyAddButton->setObjectName(QStringLiteral("emptyAddNoteButton"));
     emptyLayout->addWidget(m_emptyMessage);
-    emptyLayout->addWidget(emptyAddButton);
+    emptyLayout->addWidget(emptyAddButton, 0, Qt::AlignCenter);
 
     auto *contentLayout = new QVBoxLayout(this);
-    contentLayout->setContentsMargins(24, 24, 24, 24);
+    contentLayout->setContentsMargins(40, 40, 40, 40);
     contentLayout->setSpacing(16);
     contentLayout->addWidget(title);
     contentLayout->addWidget(description);
     contentLayout->addLayout(actionBar);
-    contentLayout->addWidget(m_noteTable);
-    contentLayout->addWidget(m_emptyState);
+    contentLayout->addWidget(m_noteTable, 1);
+    contentLayout->addWidget(m_emptyState, 1);
 
     connect(addButton, &QPushButton::clicked, this, &NotesPage::addNote);
     connect(emptyAddButton, &QPushButton::clicked, this, &NotesPage::addNote);

@@ -1,0 +1,18 @@
+A:\NEXUS\tests\notes_ui_tests.cpp: In member function 'void NotesUiTests::cleanup()':
+A:\NEXUS\tests\notes_ui_tests.cpp:75:29: error: qualified-id in declaration before '(' token
+   75 | int NotesUiTests::insertUser(const QString &name, const QString &email)
+      |                             ^
+A:\NEXUS\tests\notes_ui_tests.cpp:90:32: error: qualified-id in declaration before '(' token
+   90 | int NotesUiTests::insertSubject(int userId, const QString &name)
+      |                                ^
+A:\NEXUS\tests\notes_ui_tests.cpp:109:29: error: qualified-id in declaration before '(' token
+  109 | int NotesUiTests::insertNote(int userId, int subjectId, const QString &title)
+      |                             ^
+A:\NEXUS\tests\notes_ui_tests.cpp:190:34: error: qualified-id in declaration before '(' token
+  190 | void NotesUiTests::fillNoteDialog(const QString &title)
+      |                                  ^
+mingw32-make[3]: *** [CMakeFiles\nexus_notes_ui_tests.dir\build.make:101: CMakeFiles/nexus_notes_ui_tests.dir/tests/notes_ui_tests.cpp.obj] Error 1
+mingw32-make[3]: *** Waiting for unfinished jobs....
+mingw32-make[2]: *** [CMakeFiles\Makefile2:963: CMakeFiles/nexus_notes_ui_tests.dir/all] Error 2
+mingw32-make[1]: *** [CMakeFiles\Makefile2:970: CMakeFiles/nexus_notes_ui_tests.dir/rule] Error 2
+mingw32-make: *** [Makefile:432: nexus_notes_ui_tests] Error 2

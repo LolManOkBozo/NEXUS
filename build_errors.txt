@@ -1,0 +1,11 @@
+Warning: Cannot find any version of the dxcompiler.dll and dxil.dll. This is not a problem unless Direct3D 12 and certain features are used by the application.
+A:\NEXUS\tests\notes_service_tests.cpp: In member function 'void NotesServiceTests::cleanupTestCase()':
+A:\NEXUS\tests\notes_service_tests.cpp:83:34: error: qualified-id in declaration before '(' token
+   83 | int NotesServiceTests::insertUser(const QString &name, const QString &email)
+      |                                  ^
+A:\NEXUS\tests\notes_service_tests.cpp:98:37: error: qualified-id in declaration before '(' token
+   98 | int NotesServiceTests::insertSubject(int userId, const QString &name)
+      |                                     ^
+A:\NEXUS\tests\notes_service_tests.cpp:117:33: error: qualified-id in declaration before '(' token
+  117 | Note NotesServiceTests::makeNote(int userId, int subjectId,
+      |                                 ^

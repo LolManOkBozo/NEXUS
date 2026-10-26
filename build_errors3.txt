@@ -1,0 +1,80 @@
+A:\NEXUS\tests\notes_service_tests.cpp: In member function 'Note NotesServiceTests::makeNote(int, int, const QString&) const':
+A:\NEXUS\tests\notes_service_tests.cpp:130:48: error: qualified-id in declaration before '(' token
+  130 | void NotesServiceTests::addRetrieveUpdateDelete()
+      |                                                ^
+A:\NEXUS\tests\notes_service_tests.cpp:170:48: error: qualified-id in declaration before '(' token
+  170 | void NotesServiceTests::isolateUsersAndSubjects()
+      |                                                ^
+A:\NEXUS\tests\notes_service_tests.cpp:190:47: error: qualified-id in declaration before '(' token
+  190 | void NotesServiceTests::validateRequiredFields()
+      |                                               ^
+A:\NEXUS\tests\notes_service_tests.cpp:203:54: error: qualified-id in declaration before '(' token
+  203 | void NotesServiceTests::daoScopesEveryOperationToUser()
+      |                                                      ^
+A:\NEXUS\tests\notes_service_tests.cpp:227:50: error: qualified-id in declaration before '(' token
+  227 | void NotesServiceTests::reportUnavailableDatabase()
+      |                                                  ^
+In file included from C:/Qt/6.12.0/mingw_64/include/QtTest/QtTest:11,
+                 from A:\NEXUS\tests\notes_service_tests.cpp:1:
+A:\NEXUS\tests\notes_service_tests.cpp:240:1: error: a function-definition is not allowed here before '{' token
+  240 | QTEST_GUILESS_MAIN(NotesServiceTests)
+      | ^~~~~~~~~~~~~~~~~~
+In file included from A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:11,
+                 from A:\NEXUS\tests\notes_service_tests.cpp:241:
+C:/Qt/6.12.0/mingw_64/include/QtCore/qtmochelpers.h:30:1: error: 'namespace' definition is not allowed here
+   30 | namespace QtMocHelpers {
+      | ^~~~~~~~~
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:32:11: error: expected identifier before '{' token
+   32 | namespace {
+      |           ^
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:36:1: error: a template declaration cannot appear at block scope
+   36 | template <> constexpr inline auto NotesServiceTests::qt_create_metaobjectdata<qt_meta_tag_ZN17NotesServiceTestsE_t>()
+      | ^~~~~~~~
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:87:43: error: qualified-id in declaration before '(' token
+   87 | void NotesServiceTests::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+      |                                           ^
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:106:49: error: qualified-id in declaration before '(' token
+  106 | const QMetaObject *NotesServiceTests::metaObject() const
+      |                                                 ^
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:111:37: error: qualified-id in declaration before '(' token
+  111 | void *NotesServiceTests::qt_metacast(const char *_clname)
+      |                                     ^
+A:/NEXUS/build/nexus_notes_service_tests_autogen/include/notes_service_tests.moc:119:35: error: qualified-id in declaration before '(' token
+  119 | int NotesServiceTests::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+      |                                   ^
+A:\NEXUS\tests\notes_service_tests.cpp: At global scope:
+A:\NEXUS\tests\notes_service_tests.cpp:251:5: error: expected unqualified-id before 'delete'
+  251 |     delete m_notesService;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_service_tests.cpp:252:5: error: expected unqualified-id before 'delete'
+  252 |     delete m_subjectDAO;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_service_tests.cpp:253:5: error: expected unqualified-id before 'delete'
+  253 |     delete m_notesDAO;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_service_tests.cpp:254:5: error: expected unqualified-id before 'delete'
+  254 |     delete m_databaseManager;
+      |     ^~~~~~
+A:\NEXUS\tests\notes_service_tests.cpp:255:5: error: 'm_notesService' does not name a type; did you mean 'NotesService'?
+  255 |     m_notesService = nullptr;
+      |     ^~~~~~~~~~~~~~
+      |     NotesService
+A:\NEXUS\tests\notes_service_tests.cpp:256:5: error: 'm_subjectDAO' does not name a type; did you mean 'SubjectDAO'?
+  256 |     m_subjectDAO = nullptr;
+      |     ^~~~~~~~~~~~
+      |     SubjectDAO
+A:\NEXUS\tests\notes_service_tests.cpp:257:5: error: 'm_notesDAO' does not name a type; did you mean 'NotesDAO'?
+  257 |     m_notesDAO = nullptr;
+      |     ^~~~~~~~~~
+      |     NotesDAO
+A:\NEXUS\tests\notes_service_tests.cpp:258:5: error: 'm_databaseManager' does not name a type; did you mean 'DatabaseManager'?
+  258 |     m_databaseManager = nullptr;
+      |     ^~~~~~~~~~~~~~~~~
+      |     DatabaseManager
+A:\NEXUS\tests\notes_service_tests.cpp:259:1: error: expected declaration before '}' token
+  259 | }
+      | ^
+mingw32-make[3]: *** [CMakeFiles\nexus_notes_service_tests.dir\build.make:101: CMakeFiles/nexus_notes_service_tests.dir/tests/notes_service_tests.cpp.obj] Error 1
+mingw32-make[2]: *** [CMakeFiles\Makefile2:930: CMakeFiles/nexus_notes_service_tests.dir/all] Error 2
+mingw32-make[1]: *** [CMakeFiles\Makefile2:937: CMakeFiles/nexus_notes_service_tests.dir/rule] Error 2
+mingw32-make: *** [Makefile:419: nexus_notes_service_tests] Error 2
