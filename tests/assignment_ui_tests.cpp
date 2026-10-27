@@ -471,7 +471,10 @@ void AssignmentUiTests::failedSaveKeepsDialogValuesAndCanRetry()
         date->setDate(QDate(2098, 12, 20));
         timeEnabled->setChecked(true);
         time->setTime(QTime(14, 25));
-        m_application->databaseManager()->close();
+
+        QSqlQuery trigQuery(m_application->databaseManager()->database());
+        QVERIFY(trigQuery.exec(QStringLiteral("CREATE TRIGGER fail_insert_test BEFORE INSERT ON assignments BEGIN SELECT RAISE(FAIL, 'Simulated failure'); END;")));
+
         QTimer::singleShot(0, this, [this] {
             auto *messageBox =
                 qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
@@ -499,10 +502,9 @@ void AssignmentUiTests::failedSaveKeepsDialogValuesAndCanRetry()
             && retainedTimeEnabled->isChecked()
             && retainedTime->time() == QTime(14, 25);
 
-        if (!m_application->initialize()) {
-            dialog->reject();
-            return;
-        }
+        QSqlQuery dropQuery(m_application->databaseManager()->database());
+        QVERIFY(dropQuery.exec(QStringLiteral("DROP TRIGGER fail_insert_test")));
+
         save->click();
     });
 
@@ -551,10 +553,14 @@ void AssignmentUiTests::failedEditKeepsDialogValuesAndCanRetry()
         }
         title->setText(QStringLiteral("Edited assignment"));
         date->setDate(QDate(2098, 11, 19));
-        m_application->databaseManager()->close();
-        QTimer::singleShot(0, this, [] {
-            if (auto *messageBox =
-                    qobject_cast<QMessageBox *>(QApplication::activeModalWidget())) {
+
+        QSqlQuery trigQuery(m_application->databaseManager()->database());
+        QVERIFY(trigQuery.exec(QStringLiteral("CREATE TRIGGER fail_update_test BEFORE UPDATE ON assignments BEGIN SELECT RAISE(FAIL, 'Simulated failure'); END;")));
+
+        QTimer::singleShot(0, this, [this] {
+            auto *messageBox =
+                qobject_cast<QMessageBox *>(QApplication::activeModalWidget());
+            if (messageBox) {
                 messageBox->accept();
             }
         });
@@ -571,10 +577,13 @@ void AssignmentUiTests::failedEditKeepsDialogValuesAndCanRetry()
             && retainedTitle->text() == QStringLiteral("Edited assignment")
             && retainedDate->date() == QDate(2098, 11, 19);
 
-        if (!m_application->initialize()) {
-            dialog->reject();
-            return;
-        }
+        QSqlQuery checkQuery(m_application->databaseManager()->database());
+        QVERIFY(checkQuery.exec(QStringLiteral("SELECT title FROM assignments WHERE title = 'Existing assignment'")));
+        QVERIFY(checkQuery.next());
+
+        QSqlQuery dropQuery(m_application->databaseManager()->database());
+        QVERIFY(dropQuery.exec(QStringLiteral("DROP TRIGGER fail_update_test")));
+
         save->click();
     });
     editButton->click();
