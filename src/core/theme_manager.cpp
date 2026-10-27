@@ -75,26 +75,26 @@ void ThemeManager::applyTheme(Theme theme)
 
     if (theme == Theme::Light) {
         qssPath = QStringLiteral(":/styles/theme_light.qss");
-        palette.setColor(QPalette::Window, QColor("#f5f6f8"));
-        palette.setColor(QPalette::WindowText, QColor("#212529"));
-        palette.setColor(QPalette::Base, QColor("#ffffff"));
-        palette.setColor(QPalette::AlternateBase, QColor("#f0f2f5"));
-        palette.setColor(QPalette::Text, QColor("#212529"));
-        palette.setColor(QPalette::Button, QColor("#e4e7eb"));
-        palette.setColor(QPalette::ButtonText, QColor("#212529"));
-        palette.setColor(QPalette::Highlight, QColor("#0066cc"));
-        palette.setColor(QPalette::HighlightedText, QColor("#ffffff"));
+        palette.setColor(QPalette::Window, QColor("#F5F0E6"));
+        palette.setColor(QPalette::WindowText, QColor("#29251F"));
+        palette.setColor(QPalette::Base, QColor("#FFFCF5"));
+        palette.setColor(QPalette::AlternateBase, QColor("#E7DED0"));
+        palette.setColor(QPalette::Text, QColor("#29251F"));
+        palette.setColor(QPalette::Button, QColor("#FFFCF5"));
+        palette.setColor(QPalette::ButtonText, QColor("#29251F"));
+        palette.setColor(QPalette::Highlight, QColor("#B94E25"));
+        palette.setColor(QPalette::HighlightedText, QColor("#FFFCF5"));
     } else {
         qssPath = QStringLiteral(":/styles/theme.qss");
-        palette.setColor(QPalette::Window, QColor("#2b2b2b"));
-        palette.setColor(QPalette::WindowText, QColor("#ffffff"));
-        palette.setColor(QPalette::Base, QColor("#3c3f41"));
-        palette.setColor(QPalette::AlternateBase, QColor("#323537"));
-        palette.setColor(QPalette::Text, QColor("#ffffff"));
-        palette.setColor(QPalette::Button, QColor("#3c3f41"));
-        palette.setColor(QPalette::ButtonText, QColor("#ffffff"));
-        palette.setColor(QPalette::Highlight, QColor("#4b6eaf"));
-        palette.setColor(QPalette::HighlightedText, QColor("#ffffff"));
+        palette.setColor(QPalette::Window, QColor("#252622"));
+        palette.setColor(QPalette::WindowText, QColor("#F1EADF"));
+        palette.setColor(QPalette::Base, QColor("#2D2E29"));
+        palette.setColor(QPalette::AlternateBase, QColor("#363732"));
+        palette.setColor(QPalette::Text, QColor("#F1EADF"));
+        palette.setColor(QPalette::Button, QColor("#2D2E29"));
+        palette.setColor(QPalette::ButtonText, QColor("#F1EADF"));
+        palette.setColor(QPalette::Highlight, QColor("#FF985F"));
+        palette.setColor(QPalette::HighlightedText, QColor("#252622"));
     }
 
     qApp->setPalette(palette);

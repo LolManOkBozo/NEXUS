@@ -30,42 +30,87 @@
 
 namespace
 {
-QFrame *createMetricCard(const QString &title, const QString &valueObjectName,
-                         QLabel **valueLabel, QWidget *parent)
+QFrame *createHeroCard(const QString &title, const QString &valueObjectName,
+                       QLabel **valueLabel, QWidget *parent)
 {
     auto *card = new QFrame(parent);
-    card->setObjectName(QStringLiteral("dashboardMetricCard"));
+    card->setObjectName(QStringLiteral("dashboardHeroCard"));
     auto *layout = new QVBoxLayout(card);
-    layout->setContentsMargins(16, 16, 16, 16);
-    layout->setSpacing(4);
+    layout->setContentsMargins(28, 28, 28, 28);
+    layout->setSpacing(12);
 
+    auto *headerLayout = new QHBoxLayout;
+    headerLayout->setContentsMargins(0, 0, 0, 0);
     auto *titleLabel = new QLabel(title, card);
-    titleLabel->setObjectName(QStringLiteral("dashboardMetricTitle"));
+    titleLabel->setObjectName(QStringLiteral("dashboardHeroTitle"));
+    auto *badgeLabel = new QLabel(QCoreApplication::translate("DashboardPage", "KEY METRIC"), card);
+    badgeLabel->setObjectName(QStringLiteral("dashboardHeroBadge"));
+    headerLayout->addWidget(titleLabel);
+    headerLayout->addStretch();
+    headerLayout->addWidget(badgeLabel);
+
     *valueLabel = new QLabel(QStringLiteral("—"), card);
     (*valueLabel)->setObjectName(valueObjectName);
-    (*valueLabel)->setStyleSheet(QStringLiteral("font-size: 24pt; font-weight: bold;"));
-    layout->addWidget(titleLabel);
+    (*valueLabel)->setStyleSheet(QStringLiteral("font-size: 32pt; font-weight: 800; color: #ff6b00;"));
+
+    layout->addLayout(headerLayout);
     layout->addWidget(*valueLabel);
     return card;
 }
 
-QFrame *createListPanel(const QString &title, QListWidget **listWidget,
+QFrame *createListPanel(const QString &title, const QString &indexNum, QListWidget **listWidget,
                         const QString &objectName, QWidget *parent)
 {
     auto *frame = new QFrame(parent);
     frame->setObjectName(QStringLiteral("dashboardPanel"));
     auto *layout = new QVBoxLayout(frame);
-    layout->setContentsMargins(20, 20, 20, 20);
-    layout->setSpacing(8);
+    layout->setContentsMargins(28, 28, 28, 28);
+    layout->setSpacing(16);
 
+    auto *headerLayout = new QHBoxLayout;
+    headerLayout->setContentsMargins(0, 0, 0, 0);
     auto *titleLabel = new QLabel(title, frame);
     titleLabel->setObjectName(QStringLiteral("dashboardPanelTitle"));
+    auto *indexLabel = new QLabel(indexNum, frame);
+    indexLabel->setObjectName(QStringLiteral("dashboardPanelIndex"));
+    headerLayout->addWidget(titleLabel);
+    headerLayout->addStretch();
+    headerLayout->addWidget(indexLabel);
+
     *listWidget = new QListWidget(frame);
     (*listWidget)->setObjectName(objectName);
-    (*listWidget)->setMinimumHeight(220);
-    layout->addWidget(titleLabel);
+    (*listWidget)->setMinimumHeight(260);
+    layout->addLayout(headerLayout);
     layout->addWidget(*listWidget, 1);
     return frame;
+}
+
+QFrame *createMetricCard(const QString &title, const QString &valueObjectName,
+                         QLabel **valueLabel, int index, QWidget *parent)
+{
+    auto *card = new QFrame(parent);
+    card->setObjectName(QStringLiteral("dashboardMetricCard"));
+    auto *layout = new QVBoxLayout(card);
+    layout->setContentsMargins(20, 20, 20, 20);
+    layout->setSpacing(6);
+
+    auto *headerLayout = new QHBoxLayout;
+    headerLayout->setContentsMargins(0, 0, 0, 0);
+    auto *titleLabel = new QLabel(title, card);
+    titleLabel->setObjectName(QStringLiteral("dashboardMetricTitle"));
+    auto *indexLabel = new QLabel(QStringLiteral("0%1").arg(index), card);
+    indexLabel->setObjectName(QStringLiteral("dashboardMetricIndex"));
+    headerLayout->addWidget(titleLabel);
+    headerLayout->addStretch();
+    headerLayout->addWidget(indexLabel);
+
+    *valueLabel = new QLabel(QStringLiteral("—"), card);
+    (*valueLabel)->setObjectName(valueObjectName);
+    (*valueLabel)->setStyleSheet(QStringLiteral("font-size: 22pt; font-weight: bold;"));
+
+    layout->addLayout(headerLayout);
+    layout->addWidget(*valueLabel);
+    return card;
 }
 
 QString subjectName(const QHash<int, QString> &subjectNames, int subjectId)
@@ -99,49 +144,55 @@ DashboardPage::DashboardPage(Application *application, QWidget *parent)
     welcomeLayout->addWidget(welcomeSubtitle);
     welcomeLayout->setSpacing(4);
 
-    auto *cardsFrame = new QFrame(this);
-    cardsFrame->setObjectName(QStringLiteral("cardsFrame"));
-    auto *cardsLayout = new QGridLayout(cardsFrame);
+    auto *topRowLayout = new QHBoxLayout;
+    topRowLayout->setSpacing(20);
+
+    auto *metricsWidget = new QWidget(this);
+    auto *cardsLayout = new QGridLayout(metricsWidget);
     cardsLayout->setContentsMargins(0, 0, 0, 0);
     cardsLayout->setSpacing(16);
     cardsLayout->addWidget(createMetricCard(
         tr("Subjects"), QStringLiteral("dashboardSubjectCountValue"),
-        &m_subjectCountValue, cardsFrame), 0, 0);
+        &m_subjectCountValue, 1, metricsWidget), 0, 0);
     cardsLayout->addWidget(createMetricCard(
         tr("Open Assignments"), QStringLiteral("dashboardPendingAssignmentValue"),
-        &m_pendingAssignmentValue, cardsFrame), 0, 1);
+        &m_pendingAssignmentValue, 2, metricsWidget), 0, 1);
     cardsLayout->addWidget(createMetricCard(
         tr("Overdue Assignments"), QStringLiteral("dashboardOverdueAssignmentValue"),
-        &m_overdueAssignmentValue, cardsFrame), 0, 2);
+        &m_overdueAssignmentValue, 3, metricsWidget), 0, 2);
     cardsLayout->addWidget(createMetricCard(
         tr("Assignments: Next 7 Days"),
         QStringLiteral("dashboardUpcomingAssignmentValue"),
-        &m_upcomingAssignmentValue, cardsFrame), 1, 0);
+        &m_upcomingAssignmentValue, 4, metricsWidget), 1, 0);
     cardsLayout->addWidget(createMetricCard(
         tr("Exams: Next 7 Days"), QStringLiteral("dashboardUpcomingExamValue"),
-        &m_upcomingExamValue, cardsFrame), 1, 1);
-    cardsLayout->addWidget(createMetricCard(
-        tr("Overall Attendance"), QStringLiteral("dashboardAttendanceValue"),
-        &m_attendanceValue, cardsFrame), 1, 2);
+        &m_upcomingExamValue, 5, metricsWidget), 1, 1);
+
+    auto *heroCard = createHeroCard(tr("Overall Attendance"),
+                                      QStringLiteral("dashboardAttendanceValue"),
+                                      &m_attendanceValue, this);
+
+    topRowLayout->addWidget(metricsWidget, 2);
+    topRowLayout->addWidget(heroCard, 1);
 
     m_statusLabel = new QLabel(this);
     m_statusLabel->setObjectName(QStringLiteral("dashboardStatus"));
     m_statusLabel->setWordWrap(true);
 
     auto *panelsLayout = new QHBoxLayout;
-    panelsLayout->setSpacing(16);
+    panelsLayout->setSpacing(20);
     panelsLayout->addWidget(createListPanel(
-        tr("Today's Schedule"), &m_todaySchedule,
+        tr("Today's Schedule"), QStringLiteral("01"), &m_todaySchedule,
         QStringLiteral("dashboardTodaySchedule"), this), 1);
     panelsLayout->addWidget(createListPanel(
-        tr("Upcoming Assignments and Exams"), &m_upcomingItems,
+        tr("Upcoming Assignments & Exams"), QStringLiteral("02"), &m_upcomingItems,
         QStringLiteral("dashboardUpcomingItems"), this), 1);
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(24, 24, 24, 24);
-    mainLayout->setSpacing(20);
+    mainLayout->setContentsMargins(36, 36, 36, 36);
+    mainLayout->setSpacing(24);
     mainLayout->addLayout(welcomeLayout);
-    mainLayout->addWidget(cardsFrame);
+    mainLayout->addLayout(topRowLayout);
     mainLayout->addWidget(m_statusLabel);
     mainLayout->addLayout(panelsLayout, 1);
 

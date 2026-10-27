@@ -1,30 +1,32 @@
-/* NEXUS Dark Theme */
+/* NEXUS Dark Theme - Design System */
 QMainWindow {
-    background-color: #2b2b2b;
-    color: #ffffff;
+    background-color: #252622;
+    color: #F1EADF;
 }
 QWidget {
-    background-color: #2b2b2b;
-    color: #ffffff;
+    background-color: #252622;
+    color: #F1EADF;
     font-family: "Segoe UI";
     font-size: 10pt;
 }
 QListWidget#sidebar {
-    background-color: #252525;
-    border: none;
+    background-color: #2D2E29;
+    border-right: 1px solid #49463D;
     outline: none;
 }
 QListWidget#sidebar::item {
     padding: 11px 12px;
     border-radius: 4px;
     margin: 2px;
+    color: #A39E93;
 }
 QListWidget#sidebar::item:selected {
-    background-color: #3c3f41;
-    color: #ffffff;
+    background-color: #383933;
+    color: #FF985F;
+    font-weight: bold;
 }
 QLabel {
-    color: #ffffff;
+    color: #F1EADF;
     background-color: transparent;
     border: none;
     padding: 0;
@@ -32,8 +34,126 @@ QLabel {
 QFrame#cardsFrame,
 QFrame#card,
 QFrame#scheduleFrame {
-    background-color: #3c3f41;
+    background-color: transparent;
     border-radius: 8px;
+}
+QFrame#dashboardHeroCard {
+    background-color: #2D2E29;
+    border: 1px solid #FF985F;
+    border-radius: 6px;
+}
+QLabel#dashboardHeroTitle {
+    font-size: 11pt;
+    color: #FF985F;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+QLabel#dashboardHeroBadge {
+    font-size: 8.5pt;
+    color: #252622;
+    background-color: #FF985F;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+QFrame#dashboardPanel {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    border-radius: 6px;
+}
+QLabel#welcomeTitle {
+    font-size: 24pt;
+    font-weight: 700;
+    color: #F1EADF;
+}
+QLabel#welcomeSubtitle {
+    font-size: 11pt;
+    color: #A39E93;
+}
+QLabel#dashboardMetricTitle {
+    font-size: 9.5pt;
+    color: #A39E93;
+    font-weight: 600;
+}
+QLabel#dashboardMetricIndex {
+    font-size: 10pt;
+    color: #FF985F;
+    font-weight: bold;
+}
+QLabel#dashboardPanelTitle {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #F1EADF;
+}
+QLabel#dashboardPanelIndex {
+    font-size: 11pt;
+    color: #FF985F;
+    font-weight: bold;
+}
+QPushButton {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    padding: 9px 14px;
+    min-height: 20px;
+    border-radius: 4px;
+    color: #F1EADF;
+}
+QPushButton:hover {
+    background-color: #363732;
+    border-color: #FF985F;
+}
+QPushButton:pressed {
+    background-color: #22231F;
+}
+QLineEdit,
+QComboBox,
+QAbstractSpinBox {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    border-radius: 4px;
+    padding: 8px 9px;
+    min-height: 20px;
+    color: #F1EADF;
+}
+QLineEdit:focus,
+QComboBox:focus,
+QAbstractSpinBox:focus {
+    border: 1px solid #FF985F;
+}
+QTableWidget {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    gridline-color: #49463D;
+    color: #F1EADF;
+    border-radius: 6px;
+}
+QHeaderView::section {
+    background-color: #252622;
+    color: #A39E93;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #49463D;
+    font-weight: bold;
+}
+QLabel#dashboardMetricTitle {
+    font-size: 9.5pt;
+    color: #9ca3af;
+    font-weight: 600;
+}
+QLabel#dashboardMetricIndex {
+    font-size: 10pt;
+    color: #fb923c;
+    font-weight: bold;
+}
+QLabel#dashboardPanelTitle {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #f3f4f6;
+}
+QLabel#dashboardPanelIndex {
+    font-size: 11pt;
+    color: #fb923c;
+    font-weight: bold;
 }
 QPushButton {
     background-color: #3c3f41;
