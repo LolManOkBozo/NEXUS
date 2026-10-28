@@ -406,6 +406,22 @@ bool DatabaseManager::createSchema()
             "FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, "
             "FOREIGN KEY(subject_id) REFERENCES subjects(id) ON DELETE SET NULL"
             ");"
+        ),
+        // study_files table
+        QStringLiteral(
+            "CREATE TABLE IF NOT EXISTS study_files ("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "user_id INTEGER NOT NULL, "
+            "subject_id INTEGER, "
+            "original_filename TEXT NOT NULL, "
+            "managed_filename TEXT NOT NULL, "
+            "managed_file_path TEXT NOT NULL, "
+            "file_type TEXT NOT NULL, "
+            "file_size INTEGER NOT NULL, "
+            "imported_at TEXT NOT NULL, "
+            "FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE, "
+            "FOREIGN KEY(subject_id) REFERENCES subjects(id) ON DELETE SET NULL"
+            ");"
         )
     };
 

@@ -352,7 +352,7 @@ void AssignmentUiTests::addsEditsFiltersAndDeletesAssignments()
     QCOMPARE(actions->objectName(), QStringLiteral("assignmentActionWidget"));
     auto *actionLayout = qobject_cast<QHBoxLayout *>(actions->layout());
     QVERIFY(actionLayout);
-    QCOMPARE(actionLayout->contentsMargins(), QMargins(8, 5, 8, 5));
+    QCOMPARE(actionLayout->contentsMargins(), QMargins(8, 2, 8, 2));
     QCOMPARE(actionLayout->spacing(), 8);
     QVERIFY(table->rowHeight(0) >= 50);
     auto *editButton = actions->findChild<QPushButton *>(

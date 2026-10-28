@@ -66,7 +66,8 @@ ExamsPage::ExamsPage(Application *application, QWidget *parent)
     m_examTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     m_examTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     m_examTable->horizontalHeader()->setSectionResizeMode(4, QHeaderView::ResizeToContents);
-    m_examTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::ResizeToContents);
+    m_examTable->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Fixed);
+    m_examTable->setColumnWidth(5, 194);
 
     m_emptyState->setObjectName(QStringLiteral("examsEmptyState"));
     auto *emptyLayout = new QVBoxLayout(m_emptyState);
@@ -161,7 +162,7 @@ void ExamsPage::refreshExams()
         auto *actionWidget = new QWidget(m_examTable);
         actionWidget->setObjectName(QStringLiteral("examActionWidget"));
         auto *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(8, 5, 8, 5);
+        actionLayout->setContentsMargins(8, 2, 8, 2);
         actionLayout->setSpacing(8);
         auto *editButton = new QPushButton(tr("Edit"), actionWidget);
         editButton->setObjectName(QStringLiteral("editExamButton"));
@@ -173,7 +174,7 @@ void ExamsPage::refreshExams()
         actionLayout->addWidget(deleteButton);
         actionWidget->setMinimumWidth(178);
         m_examTable->setCellWidget(row, 5, actionWidget);
-        m_examTable->setRowHeight(row, 50);
+        m_examTable->setRowHeight(row, 56);
         connect(editButton, &QPushButton::clicked, this,
                 [this, examId = exam.id()] { editExam(examId); });
         connect(deleteButton, &QPushButton::clicked, this,

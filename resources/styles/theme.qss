@@ -56,7 +56,15 @@ QLabel#dashboardHeroBadge {
     padding: 3px 8px;
     border-radius: 4px;
 }
-QFrame#dashboardPanel {
+QFrame#dashboardPanel,
+QFrame#settingsPanel,
+QFrame#analyticsPanel,
+QFrame#analyticsSummaryCard {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    border-radius: 6px;
+}
+QFrame#dashboardMetricCard {
     background-color: #2D2E29;
     border: 1px solid #49463D;
     border-radius: 6px;
@@ -105,9 +113,107 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #22231F;
 }
+/* Unified Button Design System (Dark Mode) */
+QPushButton#addSubjectButton,
+QPushButton#addExamButton,
+QPushButton#importFilesButton,
+QPushButton#addAssignmentButton,
+QPushButton#addNoteButton,
+QPushButton#saveAttendanceButton,
+QPushButton#subjectSaveButton,
+QPushButton#saveAssignmentButton,
+QPushButton#saveExamButton,
+QPushButton#saveNoteButton,
+QPushButton#saveSettingsButton {
+    background-color: #FF985F;
+    color: #252622;
+    border: none;
+    font-weight: bold;
+    border-radius: 6px;
+    padding: 10px 18px;
+}
+QPushButton#addSubjectButton:hover,
+QPushButton#addExamButton:hover,
+QPushButton#importFilesButton:hover,
+QPushButton#addAssignmentButton:hover,
+QPushButton#addNoteButton:hover,
+QPushButton#saveAttendanceButton:hover,
+QPushButton#subjectSaveButton:hover,
+QPushButton#saveAssignmentButton:hover,
+QPushButton#saveExamButton:hover,
+QPushButton#saveNoteButton:hover,
+QPushButton#saveSettingsButton:hover {
+    background-color: #E6854D;
+}
+
+QPushButton#editSubjectButton,
+QPushButton#editExamButton,
+QPushButton#editAssignmentButton,
+QPushButton#editNoteButton,
+QPushButton#editTimetableButton,
+QPushButton#editAttendanceButton,
+QPushButton#openStudyFileButton {
+    background-color: #36322B;
+    border: 1px solid #524B40;
+    color: #FF985F;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 600;
+}
+QPushButton#editSubjectButton:hover,
+QPushButton#editExamButton:hover,
+QPushButton#editAssignmentButton:hover,
+QPushButton#editNoteButton:hover,
+QPushButton#editTimetableButton:hover,
+QPushButton#editAttendanceButton:hover,
+QPushButton#openStudyFileButton:hover {
+    background-color: #423C33;
+    border-color: #FF985F;
+}
+
+QPushButton#deleteSubjectButton,
+QPushButton#deleteExamButton,
+QPushButton#deleteAssignmentButton,
+QPushButton#deleteNoteButton,
+QPushButton#deleteTimetableButton,
+QPushButton#deleteAttendanceButton,
+QPushButton#deleteStudyFileButton {
+    background-color: #3B2020;
+    border: 1px solid #7F2D2D;
+    color: #F87171;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 600;
+}
+QPushButton#deleteSubjectButton:hover,
+QPushButton#deleteExamButton:hover,
+QPushButton#deleteAssignmentButton:hover,
+QPushButton#deleteNoteButton:hover,
+QPushButton#deleteTimetableButton:hover,
+QPushButton#deleteAttendanceButton:hover,
+QPushButton#deleteStudyFileButton:hover {
+    background-color: #4A2828;
+    border-color: #EF4444;
+}
+
+QWidget#assignmentActionWidget,
+QWidget#subjectActionWidget,
+QWidget#timetableActionWidget,
+QWidget#examActionWidget,
+QWidget#noteActionWidget,
+QWidget#libraryActionWidget {
+    background-color: transparent;
+}
+QLabel#assignmentFieldLabel {
+    background-color: #2D2E29;
+    padding: 5px 8px;
+    border-radius: 4px;
+    color: #F1EADF;
+}
 QLineEdit,
 QComboBox,
-QAbstractSpinBox {
+QAbstractSpinBox,
+QTextEdit {
     background-color: #2D2E29;
     border: 1px solid #49463D;
     border-radius: 4px;
@@ -117,145 +223,100 @@ QAbstractSpinBox {
 }
 QLineEdit:focus,
 QComboBox:focus,
-QAbstractSpinBox:focus {
+QAbstractSpinBox:focus,
+QTextEdit:focus {
     border: 1px solid #FF985F;
-}
-QTableWidget {
-    background-color: #2D2E29;
-    border: 1px solid #49463D;
-    gridline-color: #49463D;
-    color: #F1EADF;
-    border-radius: 6px;
-}
-QHeaderView::section {
-    background-color: #252622;
-    color: #A39E93;
-    padding: 8px;
-    border: none;
-    border-bottom: 1px solid #49463D;
-    font-weight: bold;
-}
-QLabel#dashboardMetricTitle {
-    font-size: 9.5pt;
-    color: #9ca3af;
-    font-weight: 600;
-}
-QLabel#dashboardMetricIndex {
-    font-size: 10pt;
-    color: #fb923c;
-    font-weight: bold;
-}
-QLabel#dashboardPanelTitle {
-    font-size: 13pt;
-    font-weight: bold;
-    color: #f3f4f6;
-}
-QLabel#dashboardPanelIndex {
-    font-size: 11pt;
-    color: #fb923c;
-    font-weight: bold;
-}
-QPushButton {
-    background-color: #3c3f41;
-    border: none;
-    padding: 9px 14px;
-    min-height: 20px;
-    border-radius: 4px;
-    color: #ffffff;
-}
-QPushButton:hover {
-    background-color: #4a4d50;
-}
-QPushButton:pressed {
-    background-color: #35383a;
-}
-QPushButton#editAssignmentButton,
-QPushButton#deleteAssignmentButton,
-QPushButton#editSubjectButton,
-QPushButton#deleteSubjectButton,
-QPushButton#editTimetableButton,
-QPushButton#deleteTimetableButton {
-    background-color: #45494c;
-    border: 1px solid #62676b;
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-QPushButton#editAssignmentButton:hover,
-QPushButton#deleteAssignmentButton:hover,
-QPushButton#editSubjectButton:hover,
-QPushButton#deleteSubjectButton:hover,
-QPushButton#editTimetableButton:hover,
-QPushButton#deleteTimetableButton:hover {
-    background-color: #505559;
-}
-QPushButton#editAssignmentButton:pressed,
-QPushButton#deleteAssignmentButton:pressed,
-QPushButton#editSubjectButton:pressed,
-QPushButton#deleteSubjectButton:pressed,
-QPushButton#editTimetableButton:pressed,
-QPushButton#deleteTimetableButton:pressed {
-    background-color: #383c3f;
-}
-QPushButton#editSubjectButton:disabled,
-QPushButton#deleteSubjectButton:disabled,
-QPushButton#editTimetableButton:disabled,
-QPushButton#deleteTimetableButton:disabled {
-    background-color: #35383a;
-    border-color: #4d5154;
-    color: #a0a0a0;
-}
-QWidget#assignmentActionWidget {
-    background-color: transparent;
-}
-QLabel#assignmentFieldLabel {
-    background-color: #3c3f41;
-    padding: 5px 8px;
-    border-radius: 4px;
-}
-QLineEdit {
-    background-color: #3c3f41;
-    border: 1px solid #555555;
-    border-radius: 4px;
-    padding: 8px 9px;
-    min-height: 20px;
-    color: #ffffff;
-}
-QLineEdit:focus {
-    border: 1px solid #7a7a7a;
-}
-QComboBox,
-QAbstractSpinBox {
-    background-color: #3c3f41;
-    border: 1px solid #555555;
-    border-radius: 4px;
-    padding: 7px 9px;
-    min-height: 20px;
-    color: #ffffff;
-}
-QComboBox:focus,
-QAbstractSpinBox:focus {
-    border: 1px solid #7a7a7a;
 }
 QComboBox::drop-down {
     border: none;
-    padding: 0 6px;
+    width: 20px;
 }
 QComboBox QAbstractItemView {
-    background-color: #3c3f41;
-    border: 1px solid #555555;
-    selection-background-color: #4a4d50;
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    selection-background-color: #383933;
+    selection-color: #FF985F;
+    color: #F1EADF;
     padding: 4px;
 }
 QComboBox QAbstractItemView::item {
     padding: 6px 8px;
 }
+QTableWidget {
+    background-color: #2D2E29;
+    alternate-background-color: #252622;
+    gridline-color: #49463D;
+    color: #F1EADF;
+    border: 1px solid #49463D;
+    border-radius: 6px;
+}
 QTableWidget::item {
-    padding: 6px 8px;
+    padding: 8px;
+    border-bottom: 1px solid #49463D;
+}
+QTableWidget::item:selected {
+    background-color: #383933;
+    color: #FF985F;
 }
 QHeaderView::section {
+    background-color: #252622;
+    color: #A39E93;
     padding: 7px 8px;
+    border: none;
+    border-bottom: 1px solid #49463D;
+    font-weight: bold;
+}
+QListWidget {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    border-radius: 6px;
+    color: #F1EADF;
+}
+QListWidget::item {
+    padding: 8px;
+    border-bottom: 1px solid #49463D;
+}
+QListWidget::item:selected {
+    background-color: #383933;
+    color: #FF985F;
+}
+QProgressBar {
+    background-color: #2D2E29;
+    border: 1px solid #49463D;
+    border-radius: 4px;
+    text-align: center;
+    color: #F1EADF;
+}
+QProgressBar::chunk {
+    background-color: #FF985F;
+    border-radius: 4px;
+}
+QDialog,
+QMessageBox {
+    background-color: #252622;
+    color: #F1EADF;
+}
+QMessageBox QLabel {
+    color: #F1EADF;
 }
 QScrollArea {
     background-color: transparent;
     border: none;
+}
+QScrollBar:vertical {
+    background-color: #252622;
+    width: 10px;
+    margin: 0px;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical {
+    background-color: #49463D;
+    border-radius: 5px;
+    min-height: 20px;
+}
+QScrollBar::handle:vertical:hover {
+    background-color: #5E5A50;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
 }

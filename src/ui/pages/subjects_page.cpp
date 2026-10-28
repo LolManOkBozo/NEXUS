@@ -147,7 +147,7 @@ void SubjectsPage::refreshSubjects()
         auto *actionWidget = new QWidget(m_subjectsTable);
         actionWidget->setObjectName(QStringLiteral("subjectActionWidget"));
         auto *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(8, 5, 8, 5);
+        actionLayout->setContentsMargins(8, 2, 8, 2);
         actionLayout->setSpacing(8);
         auto *editButton = new QPushButton(tr("Edit"), actionWidget);
         editButton->setObjectName(QStringLiteral("editSubjectButton"));
@@ -159,7 +159,7 @@ void SubjectsPage::refreshSubjects()
         actionLayout->addWidget(deleteButton);
         actionWidget->setMinimumWidth(182);
         m_subjectsTable->setCellWidget(row, 5, actionWidget);
-        m_subjectsTable->setRowHeight(row, 50);
+        m_subjectsTable->setRowHeight(row, 56);
         connect(editButton, &QPushButton::clicked, this,
                 [this, subjectId = subject.id()] { editSubject(subjectId); });
         connect(deleteButton, &QPushButton::clicked, this,

@@ -172,7 +172,7 @@ void TimetablePage::refreshTimetable()
         auto *actionWidget = new QWidget(m_timetableTable);
         actionWidget->setObjectName(QStringLiteral("timetableActionWidget"));
         auto *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(8, 5, 8, 5);
+        actionLayout->setContentsMargins(8, 2, 8, 2);
         actionLayout->setSpacing(8);
         auto *editButton = new QPushButton(tr("Edit"), actionWidget);
         editButton->setObjectName(QStringLiteral("editTimetableButton"));
@@ -184,7 +184,7 @@ void TimetablePage::refreshTimetable()
         actionLayout->addWidget(deleteButton);
         actionWidget->setMinimumWidth(182);
         m_timetableTable->setCellWidget(row, 3, actionWidget);
-        m_timetableTable->setRowHeight(row, 50);
+        m_timetableTable->setRowHeight(row, 56);
         connect(editButton, &QPushButton::clicked, this,
                 [this, timetableId = entry.id()] { editTimetable(timetableId); });
         connect(deleteButton, &QPushButton::clicked, this,

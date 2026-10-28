@@ -261,7 +261,7 @@ void SubjectsUiTests::navigateAndManageSubjects()
     QCOMPARE(rowActions->objectName(), QStringLiteral("subjectActionWidget"));
     auto *subjectActionLayout = qobject_cast<QHBoxLayout *>(rowActions->layout());
     QVERIFY(subjectActionLayout);
-    QCOMPARE(subjectActionLayout->contentsMargins(), QMargins(8, 5, 8, 5));
+    QCOMPARE(subjectActionLayout->contentsMargins(), QMargins(8, 2, 8, 2));
     QCOMPARE(subjectActionLayout->spacing(), 8);
     QVERIFY(table->rowHeight(0) >= 50);
     QVERIFY(table->columnWidth(5) >= 194);

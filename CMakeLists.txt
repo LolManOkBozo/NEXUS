@@ -57,6 +57,8 @@ add_executable(NEXUS
     src/data/exam_dao.cpp
     src/data/notes_dao.h
     src/data/notes_dao.cpp
+    src/data/study_file_dao.h
+    src/data/study_file_dao.cpp
     src/models/subject.h
     src/models/subject.cpp
     src/models/assignment.h
@@ -67,6 +69,8 @@ add_executable(NEXUS
     src/models/exam.cpp
     src/models/note.h
     src/models/note.cpp
+    src/models/study_file.h
+    src/models/study_file.cpp
     src/models/timetable.h
     src/models/timetable.cpp
     src/services/subject_service.h
@@ -79,6 +83,8 @@ add_executable(NEXUS
     src/services/exam_service.cpp
     src/services/notes_service.h
     src/services/notes_service.cpp
+    src/services/study_file_service.h
+    src/services/study_file_service.cpp
     src/services/timetable_service.h
     src/services/timetable_service.cpp
     src/ui/dialogs/subject_dialog.h
@@ -414,6 +420,12 @@ if(TARGET Qt6::Test)
         src/ui/pages/exams_page.h
         src/ui/pages/notes_page.cpp
         src/ui/pages/notes_page.h
+        src/models/study_file.cpp
+        src/models/study_file.h
+        src/data/study_file_dao.cpp
+        src/data/study_file_dao.h
+        src/services/study_file_service.cpp
+        src/services/study_file_service.h
         src/ui/pages/ai_tutor_page.cpp
         src/ui/pages/ai_tutor_page.h
         src/ui/pages/analytics_page.cpp
@@ -824,6 +836,12 @@ if(TARGET Qt6::Test)
         src/ui/dialogs/note_dialog.h
         src/ui/pages/notes_page.cpp
         src/ui/pages/notes_page.h
+        src/models/study_file.cpp
+        src/models/study_file.h
+        src/data/study_file_dao.cpp
+        src/data/study_file_dao.h
+        src/services/study_file_service.cpp
+        src/services/study_file_service.h
     )
     target_link_libraries(nexus_notes_ui_tests
         PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui Qt6::Sql Qt6::Test
@@ -910,6 +928,34 @@ if(TARGET Qt6::Test)
     endif()
     add_test(NAME SettingsUiTests COMMAND nexus_settings_ui_tests)
     set_tests_properties(SettingsUiTests PROPERTIES
+        ENVIRONMENT
+            "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
+    )
+
+    add_executable(nexus_study_library_tests
+        tests/study_library_tests.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/database_manager.cpp
+        src/core/database_manager.h
+        src/models/study_file.cpp
+        src/models/study_file.h
+        src/data/study_file_dao.cpp
+        src/data/study_file_dao.h
+        src/services/study_file_service.cpp
+        src/services/study_file_service.h
+    )
+    target_link_libraries(nexus_study_library_tests
+        PRIVATE Qt6::Core Qt6::Sql Qt6::Test
+    )
+    set_target_properties(nexus_study_library_tests PROPERTIES
+        AUTOMOC_COMPILER_PREDEFINES OFF
+    )
+    if(WIN32)
+        nexus_deploy_qt_runtime(nexus_study_library_tests)
+    endif()
+    add_test(NAME StudyLibraryTests COMMAND nexus_study_library_tests)
+    set_tests_properties(StudyLibraryTests PROPERTIES
         ENVIRONMENT
             "QT_QPA_PLATFORM=offscreen;QT_QPA_PLATFORM_PLUGIN_PATH=${QT_PLATFORM_PLUGIN_DIR}"
     )

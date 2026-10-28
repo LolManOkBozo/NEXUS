@@ -294,11 +294,13 @@ void AttendancePage::refreshPage()
 
         auto *editButton = new QPushButton(tr("Edit"), m_historyTable);
         editButton->setObjectName(QStringLiteral("editAttendanceButton"));
+        editButton->setMinimumWidth(76);
         auto *deleteButton = new QPushButton(tr("Delete"), m_historyTable);
         deleteButton->setObjectName(QStringLiteral("deleteAttendanceButton"));
+        deleteButton->setMinimumWidth(82);
         m_historyTable->setCellWidget(row, 2, editButton);
         m_historyTable->setCellWidget(row, 3, deleteButton);
-        m_historyTable->setRowHeight(row, 48);
+        m_historyTable->setRowHeight(row, 56);
         connect(editButton, &QPushButton::clicked, this,
                 [this, attendance] { editAttendance(attendance); });
         connect(deleteButton, &QPushButton::clicked, this,
